@@ -7,15 +7,16 @@ import {
 } from '@nestjs/websockets';
 import { Connection } from './connection';
 import { MessageDispatcher } from './message-dispatcher';
-import { ClientMessageContainer } from './messages/client/client-message-container';
-import { GameManager } from './game-manager';
+import { ClientMessageContainer } from './shared/messages/client/client-message-container';
+import { ConnectionManager } from './connection-manager';
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('AppGateway');
 
   public constructor(
-    private messageDispatcher: MessageDispatcher
+    private messageDispatcher: MessageDispatcher,
+    private connectionManager: ConnectionManager,
   ) {}
 
   public async handleDisconnect(client: WebSocket): Promise<void> {
@@ -40,7 +41,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message
       );
     };
-
-    client.send('Hej');
+    this.connectionManager.connections.push(connection);
   }
 }

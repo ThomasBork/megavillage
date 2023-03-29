@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { ServerMessageContainer } from './messages/server/server-message-container';
+import { ServerMessageContainer } from './shared/messages/server/server-message-container';
 
 export class Connection {
   public websocket: WebSocket;

@@ -1,1 +1,14 @@
-<button (click)="connect()">Connect!</button>
+<ng-container *ngIf="!game">
+  <input type="text" [(ngModel)]="playerName"/>
+  <button (click)="connect()">Connect!</button>
+</ng-container>
+<ng-container *ngIf="game">
+  <div 
+    class="game"
+    tabindex="0"
+    (keydown)="handleKeyDown($event)"
+    (keyup)="handleKeyUp($event)"
+  >
+    <app-game [game]="game"></app-game>
+  </div>
+</ng-container>

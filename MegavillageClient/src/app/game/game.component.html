@@ -1,0 +1,15 @@
+<div 
+  class="game-container" 
+  [ngStyle]="{transform: getTransform()}"
+  (keydown)="handleKeyDown($event)"
+  (keyup)="handleKeyUp($event)"
+>
+  <app-game-object
+    *ngFor="let gameObject of game.nonPlayerGameObjects"
+    [gameObject]="gameObject"
+  ></app-game-object>
+  <app-game-object
+    *ngFor="let gameObject of game.players"
+    [gameObject]="gameObject"
+  ></app-game-object>
+</div>

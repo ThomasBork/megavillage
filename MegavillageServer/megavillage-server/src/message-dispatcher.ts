@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Connection } from './connection';
 import { JoinGameHandler } from './message-handlers/join-game-handler';
-import { ClientMessageContainer } from './messages/client/client-message-container';
-import { ClientMessageJoinGame } from './messages/client/client-message-join-game';
+import { ClientMessageContainer } from './shared/messages/client/client-message-container';
+import { ClientMessageJoinGame } from './shared/messages/client/client-message-join-game';
 
 @Injectable()
 export class MessageDispatcher {
@@ -20,7 +20,7 @@ export class MessageDispatcher {
         );
         break;
       default:
-        throw new Error('Unknown message type: "' + messageContainer.type + '"');
+        throw new Error('Unknown message type: "' + messageContainer.type.toString() + '"');
     }
   }
 }
