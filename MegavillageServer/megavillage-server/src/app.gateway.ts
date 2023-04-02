@@ -35,7 +35,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const connection = new Connection(client);
     client.onmessage = async (event) => {
       this.logger.log('Client message received: ' + event.data);
-      const message = JSON.parse(event.data.toString()) as ClientMessageContainer;
+      const message = JSON.parse(event.data.toString()) as ClientMessageContainer<object>;
       this.messageDispatcher.dispatchMessage(
         connection,
         message

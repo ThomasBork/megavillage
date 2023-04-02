@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Game } from 'src/shared/game-state/game';
+import { GameService } from '../game.service';
+import { PlayerService } from '../player.service';
 
 @Component({
   selector: 'app-game',
@@ -8,28 +10,21 @@ import { Game } from 'src/shared/game-state/game';
 })
 export class GameComponent {
   @Input()
-  game!: Game;
+  public game!: Game;
 
   public zoom = 1;
-  public playerCenterX = 50;
-  public playerCenterY = 50;
+  public get playerCenterX(): number {
+    const player = this.playerService.getPlayer(this.game);
+    return player.position.x + player.size.x / 2;
+  };
+  public get playerCenterY(): number {
+    const player = this.playerService.getPlayer(this.game);
+    return player.position.y + player.size.y / 2;
+  };
+
+  public constructor(private playerService: PlayerService) {}
 
   public getTransform(): string {
     return `scale(${this.zoom}) translate(calc(50% - ${this.playerCenterX}px), calc(50% - ${this.playerCenterY}px))`;
-  }
-
-  public handleKeyDown(keyEvent: KeyboardEvent): void {
-    switch (keyEvent.key) {
-      case 'a':
-        this.playerCenterX -= 10;
-        break;
-      case 'd':
-        this.playerCenterX += 10;
-        break;
-    }
-  }
-
-  public handleKeyUp(keyEvent: KeyboardEvent): void {
-    
   }
 }

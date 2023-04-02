@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { ConnectionManager } from './connection-manager';
 import { Game } from './shared/game-state/game';
 import { GameObject } from './shared/game-state/game-object';
 import { GameObjectType } from './shared/game-state/game-object-type';
+import { Player } from './shared/game-state/player';
+import { ServerMessageContainer } from './shared/messages/server/server-message-container';
 
 @Injectable()
 export class GameManager {
@@ -19,14 +22,41 @@ export class GameManager {
   private treeHeight = 100;
   private builderNextGameObjectId: number;
 
-  public constructor() {
+  public constructor(private connectionManager: ConnectionManager) {
     this.builderNextGameObjectId = 0;
-    const nonPlayerGameObjects = this.buildWorld();
+    const gameObjects = this.buildWorld();
     this.game = {
       nextGameObjectId: this.builderNextGameObjectId,
-      players: [],
-      nonPlayerGameObjects: nonPlayerGameObjects,
+      gameObjects: gameObjects,
     };
+  }
+
+  public sendMessageToAllPlayers<T extends object>(message: ServerMessageContainer<T>): void {
+    for (const player of this.getPlayers()) {
+      const connection = this.connectionManager.getConnectionForPlayer(player.id);
+      connection.sendMessage(message);
+    }
+  }
+
+  public getGame(): Game {
+    if (!this.game) {
+      throw new Error('Game not initialized.');
+    }
+    return this.game;
+  }
+
+  public getPlayer(playerId: number): Player {
+    const player = this.getPlayers().find((p) => p.id === playerId);
+    if (!player) {
+      throw new Error('Player does not exist: "' + playerId + '".');
+    }
+    return player;
+  }
+
+  public getPlayers(): Player[] {
+    return this.getGame()
+      .gameObjects
+      .filter(g => g.type === GameObjectType.player) as Player[];
   }
 
   private buildWorld(): GameObject[] {

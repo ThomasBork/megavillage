@@ -1,6 +1,6 @@
 import { ServerMessageType } from './server-message-type';
 
-export interface ServerMessageContainer {
+export interface ServerMessageContainer<T extends object> {
   type: ServerMessageType;
-  message: object;
+  message: T;
 }

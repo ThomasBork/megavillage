@@ -7,7 +7,7 @@ export class Connection {
   public constructor(websocket: WebSocket) {
     this.websocket = websocket;
   }
-  public sendMessage(message: ServerMessageContainer) {
+  public sendMessage<T extends object>(message: ServerMessageContainer<T>) {
     this.websocket.send(JSON.stringify(message));
   }
 }
