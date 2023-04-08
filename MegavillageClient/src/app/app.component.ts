@@ -3,7 +3,7 @@ import { Game } from 'src/shared/game-state/game';
 import { ConnectionService } from './connection.service';
 import { GameService } from './game.service';
 import { KeyboardService } from './keyboard.service';
-import { SetVelocityComposerService } from './message-composers/set-velocity-composer.service';
+import { SetDirectionComposerService } from './message-composers/set-direction-composer.service';
 import { PlayerService } from './player.service';
 
 @Component({
@@ -27,7 +27,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private gameService: GameService,
     private playerService: PlayerService,
     private keyboardService: KeyboardService,
-    private setVelocityComposerService: SetVelocityComposerService,
+    private setDirectionComposerService: SetDirectionComposerService,
   ) {
     this.movementKeys = ['a', 's', 'd', 'w'];
   }
@@ -52,11 +52,14 @@ export class AppComponent implements OnInit, OnDestroy {
     if (!this.game) {
       return;
     }
-    this.keyboardService.setButtonDown(keyEvent.key);
-    if (this.movementKeys.includes(keyEvent.key)) {
-      const setVelocityMessage = this.setVelocityComposerService.compose();
-      this.connectionService.sendMessage(setVelocityMessage);
-      return;
+    const isButtonPressed = this.keyboardService.isButtonPressed(keyEvent.key);
+    if (!isButtonPressed) {
+      this.keyboardService.setButtonDown(keyEvent.key);
+      if (this.movementKeys.includes(keyEvent.key)) {
+        const setDirectionMessage = this.setDirectionComposerService.compose();
+        this.connectionService.sendMessage(setDirectionMessage);
+        return;
+      }
     }
   }
 
@@ -66,8 +69,8 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     this.keyboardService.setButtonUp(keyEvent.key);
     if (this.movementKeys.includes(keyEvent.key)) {
-      const setVelocityMessage = this.setVelocityComposerService.compose();
-      this.connectionService.sendMessage(setVelocityMessage);
+      const setDirectionMessage = this.setDirectionComposerService.compose();
+      this.connectionService.sendMessage(setDirectionMessage);
       return;
     }
   }

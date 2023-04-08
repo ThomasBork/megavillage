@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ClientMessageContainer } from 'src/shared/messages/client/client-message-container';
-import { ClientMessageSetVelocity } from 'src/shared/messages/client/client-message-set-velocity';
+import { ClientMessageSetDirection } from 'src/shared/messages/client/client-message-set-direction';
 import { ClientMessageType } from 'src/shared/messages/client/client-message-type';
 import { KeyboardService } from '../keyboard.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SetVelocityComposerService {
+export class SetDirectionComposerService {
   public constructor(private keyboardService: KeyboardService) { }
 
-  public compose(): ClientMessageContainer<ClientMessageSetVelocity> {
+  public compose(): ClientMessageContainer<ClientMessageSetDirection> {
     let x = 0;
     let y = 0;
     if (this.keyboardService.isButtonPressed('a')) {
@@ -26,10 +26,12 @@ export class SetVelocityComposerService {
       y += 1;
     }
     return {
-      type: ClientMessageType.setVelocity,
+      type: ClientMessageType.setDirection,
       message: {
-        x: x,
-        y: y,
+        newDirection: {
+          x: x,
+          y: y
+        }
       }
     };
   }

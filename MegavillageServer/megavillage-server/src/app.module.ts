@@ -10,8 +10,10 @@ import { GameObjectNewPositionComposer } from './message-composers/game-object-n
 import { PlayerJoinedComposer } from './message-composers/player-joined-composer';
 import { MessageDispatcher } from './message-dispatcher';
 import { JoinGameHandler } from './message-handlers/join-game-handler';
-import { SetVelocityHandler } from './message-handlers/set-velocity-handler';
+import { SetDirectionHandler } from './message-handlers/set-direction-handler';
 import { VectorService } from './vector.service';
+import { InputBufferService } from './game-loop/input-buffer/input-buffer.service';
+import { GameObjectService } from './game-object.service';
 
 @Module({
   imports: [],
@@ -24,8 +26,10 @@ import { VectorService } from './vector.service';
     GameManager,
     GameLoop,
     VectorService,
+    InputBufferService,
+    GameObjectService,
     JoinGameHandler,
-    SetVelocityHandler,
+    SetDirectionHandler,
     CompleteGameStateComposer,
     PlayerJoinedComposer,
     GameObjectNewPositionComposer,

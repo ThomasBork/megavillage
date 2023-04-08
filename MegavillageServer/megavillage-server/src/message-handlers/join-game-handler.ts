@@ -29,9 +29,10 @@ export class JoinGameHandler {
       type: GameObjectType.player,
       name: message.playerName,
       position: position,
-      velocity: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
       blocksMovement: false,
       size: { x: 100, y: 100 },
+      speed: 250,
     };
     game.gameObjects.push(player);
     sender.playerId = id;

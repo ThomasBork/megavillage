@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Connection } from './connection';
 import { JoinGameHandler } from './message-handlers/join-game-handler';
-import { SetVelocityHandler } from './message-handlers/set-velocity-handler';
+import { SetDirectionHandler } from './message-handlers/set-direction-handler';
 import { ClientMessageContainer } from './shared/messages/client/client-message-container';
 import { ClientMessageJoinGame } from './shared/messages/client/client-message-join-game';
-import { ClientMessageSetVelocity } from './shared/messages/client/client-message-set-velocity';
+import { ClientMessageSetDirection } from './shared/messages/client/client-message-set-direction';
 import { ClientMessageType } from './shared/messages/client/client-message-type';
 
 @Injectable()
 export class MessageDispatcher {
   public constructor(
     private joinGameHandler: JoinGameHandler,
-    private setVelocityHandler: SetVelocityHandler,
+    private setDirectionHandler: SetDirectionHandler,
   ) {}
 
   public dispatchMessage<T extends object>(
@@ -26,10 +26,10 @@ export class MessageDispatcher {
         );
         break;
       }
-      case ClientMessageType.setVelocity: {
-        this.setVelocityHandler.handle(
+      case ClientMessageType.setDirection: {
+        this.setDirectionHandler.handle(
           sender,
-          messageContainer.message as ClientMessageSetVelocity,
+          messageContainer.message as ClientMessageSetDirection,
         );
         break;
       }

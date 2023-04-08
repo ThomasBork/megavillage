@@ -5,6 +5,7 @@ import { GameObject } from './shared/game-state/game-object';
 import { GameObjectType } from './shared/game-state/game-object-type';
 import { Player } from './shared/game-state/player';
 import { ServerMessageContainer } from './shared/messages/server/server-message-container';
+import { Connection } from './connection';
 
 @Injectable()
 export class GameManager {
@@ -31,11 +32,15 @@ export class GameManager {
     };
   }
 
-  public sendMessageToAllPlayers<T extends object>(message: ServerMessageContainer<T>): void {
-    for (const player of this.getPlayers()) {
-      const connection = this.connectionManager.getConnectionForPlayer(player.id);
-      connection.sendMessage(message);
+  public queueMessageToAllPlayers<T extends object>(message: ServerMessageContainer<T>): void {
+    for (const connection of this.getConnectionsForAllPlayers()) {
+      connection.queueMessage(message);
     }
+  }
+
+  public getConnectionsForAllPlayers(): Connection[] {
+    return this.getPlayers()
+      .map((p) => this.connectionManager.getConnectionForPlayer(p.id));
   }
 
   public getGame(): Game {
@@ -71,10 +76,16 @@ export class GameManager {
     }
     objects.push(
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 2),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 4, this.treeHeight * 2),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 2),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 6),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 6),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 10, this.treeHeight * 10),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -2),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -3, this.treeHeight * -2),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -3),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -4),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -5),
     );
     return objects;
   }
@@ -86,7 +97,8 @@ export class GameManager {
       position: { x: x, y: y },
       size: { x: this.rockWidth, y: this.rockHeight },
       type: GameObjectType.rock,
-      velocity: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      speed: 0,
     };
   }
 
@@ -97,7 +109,8 @@ export class GameManager {
       position: { x: x, y: y },
       size: { x: this.treeWidth, y: this.treeHeight },
       type: GameObjectType.tree,
-      velocity: { x: 0, y: 0 },
+      direction: { x: 0, y: 0 },
+      speed: 0,
     };
   }
 }

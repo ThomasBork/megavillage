@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Game } from 'src/shared/game-state/game';
 import { GameService } from '../game.service';
 import { PlayerService } from '../player.service';
@@ -8,7 +8,7 @@ import { PlayerService } from '../player.service';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent {
+export class GameComponent implements OnInit {
   @Input()
   public game!: Game;
 
@@ -23,6 +23,10 @@ export class GameComponent {
   };
 
   public constructor(private playerService: PlayerService) {}
+  
+  public ngOnInit(): void {
+    
+  }
 
   public getTransform(): string {
     return `scale(${this.zoom}) translate(calc(50% - ${this.playerCenterX}px), calc(50% - ${this.playerCenterY}px))`;

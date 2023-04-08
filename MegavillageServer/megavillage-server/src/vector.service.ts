@@ -10,10 +10,10 @@ export class VectorService {
     };
   }
 
-  public getUnitVector(vector: Vector2): Vector2 {
+  public normalizedVector(vector: Vector2): Vector2 {
     const length = this.getLength(vector);
     if (length === 0) {
-      throw new Error('Unable to get unit vector from 0 length');
+      throw new Error('Unable to get normalized vector from 0 length');
     }
     return {
       x: vector.x / length,
@@ -37,5 +37,12 @@ export class VectorService {
 
   public getLength(vector: Vector2): number {
     return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+  }
+
+  public cloneVector(vector: Vector2): Vector2 {
+    return {
+      x: vector.x,
+      y: vector.y,
+    };
   }
 }

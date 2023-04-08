@@ -6,6 +6,7 @@ export interface GameObject {
   type: GameObjectType;
   position: Vector2;
   size: Vector2;
-  velocity: Vector2;
+  direction: Vector2;
+  speed: number;
   blocksMovement: boolean;
 }
