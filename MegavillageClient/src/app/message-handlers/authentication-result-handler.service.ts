@@ -12,6 +12,6 @@ export class AuthenticationResultHandlerService {
     if (!message.user) {
       throw new Error ('Authentication failed with message: "' + message.errorMessage + '".');
     }
-    this.userService.user = message.user;
+    this.userService.setUser(message.user);
   }
 }

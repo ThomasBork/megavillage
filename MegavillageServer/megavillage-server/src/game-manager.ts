@@ -46,6 +46,12 @@ export class GameManager {
     }
   }
 
+  public sendMessageToAllPlayers<T extends object>(message: ServerMessageContainer<T>): void {
+    for (const connection of this.getConnectionsForAllPlayers()) {
+      connection.sendMessage(message);
+    }
+  }
+
   public getConnectionsForAllPlayers(): Connection[] {
     return this.getPlayers()
       .map((p) => this.connectionManager.getConnectionForUser(p.userId))
@@ -64,10 +70,19 @@ export class GameManager {
       .find((p) => p.userId === userId);
   }
 
+  public getObjectById(gameObjectId: number): GameObject | undefined {
+    return this.getGame().gameObjects
+      .find((o) => o.id === gameObjectId);
+  }
+
   public getPlayers(): Player[] {
     return this.getGame()
       .gameObjects
       .filter(g => g.type === GameObjectType.player) as Player[];
+  }
+
+  public removeObject(gameObjectId: number): void {
+    this.getGame().gameObjects = this.getGame().gameObjects.filter((o) => o.id !== gameObjectId);
   }
 
   public addPlayerForUser(userId: number): void {
@@ -87,6 +102,7 @@ export class GameManager {
       size: this.vectorService.buildVector(100, 100),
       speed: 250,
       userId: userId,
+      action: null,
     };
     this.game.gameObjects.push(player);
 

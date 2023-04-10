@@ -45,4 +45,9 @@ export class VectorService {
       y: vector.y,
     };
   }
+
+  public areIdentical(vectorA: Vector2, vectorB: Vector2): boolean {
+    return vectorA.x === vectorB.x
+      && vectorA.y === vectorB.y;
+  }
 }

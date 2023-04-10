@@ -1,13 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Game } from 'src/shared/game-state/game';
 import { ConnectionService } from './connection.service';
 import { GameService } from './game.service';
 import { KeyboardService } from './keyboard.service';
 import { SetDirectionComposerService } from './message-composers/set-direction-composer.service';
-import { PlayerService } from './player.service';
-import { UserService } from './user.service';
 import { CreateUserResult } from 'src/shared/user/create-user-result';
 import { LogInResult } from 'src/shared/user/log-in-result';
+import { UIGame } from './ui-game-state/ui-game';
+import { ActionService } from './action.service';
 
 @Component({
   selector: 'app-root',
@@ -15,19 +14,17 @@ import { LogInResult } from 'src/shared/user/log-in-result';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public game?: Game;
+  public game?: UIGame;
   public authenticationToken: string | null;
   public screen: 'CreateUser' | 'LogIn' | 'Game';
-
-  private movementKeys: string[];
 
   public constructor(
     private connectionService: ConnectionService,
     private gameService: GameService,
     private keyboardService: KeyboardService,
     private setDirectionComposerService: SetDirectionComposerService,
+    private actionService: ActionService,
   ) {
-    this.movementKeys = ['a', 's', 'd', 'w', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ArrowUp'];
     this.screen = 'LogIn';
     this.authenticationToken = null;
   }
@@ -51,7 +48,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.connectionService.connect(this.authenticationToken);
   }
 
-
   public handleKeyDown(keyEvent: KeyboardEvent): void {
     if (!this.game) {
       return;
@@ -59,10 +55,19 @@ export class AppComponent implements OnInit, OnDestroy {
     const isButtonPressed = this.keyboardService.isButtonPressed(keyEvent.key);
     if (!isButtonPressed) {
       this.keyboardService.setButtonDown(keyEvent.key);
-      if (this.movementKeys.includes(keyEvent.key)) {
-        const setDirectionMessage = this.setDirectionComposerService.compose();
+      if (this.keyboardService.getMovementKeys().includes(keyEvent.key)) {
+        const newDirection = this.keyboardService.getMovementDirection();
+        const setDirectionMessage = this.setDirectionComposerService.compose(newDirection);
         this.connectionService.sendMessage(setDirectionMessage);
-        return;
+        const previousNonZeroMovementDirection = this.keyboardService.getPreviousNonZeroMovementDirection();
+        this.game.setMovementDirection(previousNonZeroMovementDirection);
+        this.gameService.updateCurrentTargetObject();
+      } else if (keyEvent.key === 'e') {
+        const target = this.game.getCurrentTargetObject();
+        console.log('Target: ' + target?.getId() + ', ' + target);
+        if (target) {
+          this.actionService.handleGenericActionOnObject(target);
+        }
       }
     }
   }
@@ -72,9 +77,18 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
     this.keyboardService.setButtonUp(keyEvent.key);
-    if (this.movementKeys.includes(keyEvent.key)) {
-      const setDirectionMessage = this.setDirectionComposerService.compose();
+    if (this.keyboardService.getMovementKeys().includes(keyEvent.key)) {
+      const newDirection = this.keyboardService.getMovementDirection();
+      const setDirectionMessage = this.setDirectionComposerService.compose(newDirection);
       this.connectionService.sendMessage(setDirectionMessage);
+      const previousNonZeroMovementDirection = this.keyboardService.getPreviousNonZeroMovementDirection();
+      this.game.setMovementDirection(previousNonZeroMovementDirection);
+      this.gameService.updateCurrentTargetObject();
+    }
+  }
+
+  public handleKeyPress(keyEvent: KeyboardEvent): void {
+    if (!this.game) {
       return;
     }
   }

@@ -9,6 +9,7 @@ import { Connection } from './connection';
 import { MessageDispatcher } from './message-dispatcher';
 import { ClientMessageContainer } from './shared/messages/client/client-message-container';
 import { ConnectionManager } from './connection-manager';
+import { GameManager } from './game-manager';
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -17,6 +18,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   public constructor(
     private messageDispatcher: MessageDispatcher,
     private connectionManager: ConnectionManager,
+    private gameManager: GameManager,
   ) {}
 
   public async handleDisconnect(client: WebSocket): Promise<void> {
@@ -24,6 +26,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const connection = this.connectionManager.tryGetConnectionForWebSocket(client);
     // Sometimes this connection has already been removed, if the disconnect was initiated by the server and not the client.
     if (connection) {
+      const userId = connection.tryGetUserId();
+      if (userId) {
+        this.gameManager.getPlayerByUserId(userId).direction.x = 0;
+        this.gameManager.getPlayerByUserId(userId).direction.y = 0;
+      }
       this.connectionManager.removeConnection(connection);
     }
   }

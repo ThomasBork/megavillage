@@ -10,6 +10,9 @@ import { Player } from 'src/shared/game-state/player';
 import { Vector2 } from 'src/shared/game-state/vector2';
 import { GameObject } from 'src/shared/game-state/game-object';
 import { GameObjectService } from 'src/game-object.service';
+import { ActionCompletedComposer } from 'src/message-composers/action-completed-composer';
+import { GameObjectRemovedComposer } from 'src/message-composers/game-object-removed-composer';
+import { ActionCanceledComposer } from 'src/message-composers/action-canceled-composer';
 
 @Injectable()
 export class GameLoop implements OnApplicationBootstrap {
@@ -22,9 +25,11 @@ export class GameLoop implements OnApplicationBootstrap {
 
   public constructor(
     private gameManager: GameManager,
-    private connectionManager: ConnectionManager,
     private vectorService: VectorService,
     private gameObjectNewPositionComposer: GameObjectNewPositionComposer,
+    private actionCompletedComposer: ActionCompletedComposer,
+    private actionCanceledComposer: ActionCanceledComposer,
+    private gameObjectRemovedComposer: GameObjectRemovedComposer,
     private inputBufferService: InputBufferService,
     private gameObjectService: GameObjectService,
   ) {
@@ -42,10 +47,30 @@ export class GameLoop implements OnApplicationBootstrap {
     while (this.previousTickTime + this.tickFrequencyInMilliseconds < now) {
       this.currentTickTime = this.previousTickTime + this.tickFrequencyInMilliseconds;
       const game = this.gameManager.getGame();
+      this.updatePlayerActions(game);
       this.updateGameObjectMovement(game);
       this.previousTickTime = this.currentTickTime;
     }
     this.flushMessageQueues();
+  }
+
+  private updatePlayerActions(game: Game): void {
+    for (const gameObject of game.gameObjects) {
+      if (gameObject.type === GameObjectType.player) {
+        const player = gameObject as Player;
+        if (player.action) {
+          player.action.timeRemainingInMilliseconds -= this.tickFrequencyInMilliseconds;
+          if (player.action.timeRemainingInMilliseconds < 0) {
+            const actionCompletedMessage = this.actionCompletedComposer.compose(player.id);
+            this.gameManager.queueMessageToAllPlayers(actionCompletedMessage);
+            this.gameManager.removeObject(player.action.targetGameObjectId);
+            const targetRemovedMessage = this.gameObjectRemovedComposer.compose(player.action.targetGameObjectId);
+            this.gameManager.queueMessageToAllPlayers(targetRemovedMessage);
+            player.action = null;
+          }
+        }
+      }
+    }
   }
 
   private updateGameObjectMovement(game: Game): void {
@@ -65,8 +90,19 @@ export class GameLoop implements OnApplicationBootstrap {
         const oldGameObjectPosition = gameObject.position;
         const newGameObjectPosition = this.vectorService.addVectors(gameObject.position, tickMovementVector);
         gameObject.position = newGameObjectPosition;
-        const newPositionMessage = this.gameObjectNewPositionComposer.compose(gameObject.id, oldGameObjectPosition, newGameObjectPosition);
-        this.gameManager.queueMessageToAllPlayers(newPositionMessage);
+        if (!this.vectorService.areIdentical(oldGameObjectPosition, newGameObjectPosition)) {
+          const newPositionMessage = this.gameObjectNewPositionComposer.compose(gameObject.id, oldGameObjectPosition, newGameObjectPosition);
+          this.gameManager.queueMessageToAllPlayers(newPositionMessage);
+
+          if (gameObject.type === GameObjectType.player) {
+            const playerObject = gameObject as Player;
+            if (playerObject.action) {
+              const actionCanceledMessage = this.actionCanceledComposer.compose(playerObject.id);
+              this.gameManager.queueMessageToAllPlayers(actionCanceledMessage);
+              playerObject.action = null;
+            }
+          }
+        }
       }
     }
   }

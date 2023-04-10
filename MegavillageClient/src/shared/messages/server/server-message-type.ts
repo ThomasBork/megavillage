@@ -4,4 +4,8 @@ export enum ServerMessageType {
   playerJoined = 'playerJoined',
   completeGameState = 'completeGameState',
   gameObjectNewPosition = 'gameObjectNewPosition',
+  actionStarted = 'actionStarted',
+  actionCanceled = 'actionCanceled',
+  actionCompleted = 'actionCompleted',
+  gameObjectRemoved = 'gameObjectRemoved',
 }

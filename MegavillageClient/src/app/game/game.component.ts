@@ -1,7 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Game } from 'src/shared/game-state/game';
-import { GameService } from '../game.service';
-import { PlayerService } from '../player.service';
+import { UIGame } from '../ui-game-state/ui-game';
 
 @Component({
   selector: 'app-game',
@@ -10,19 +8,17 @@ import { PlayerService } from '../player.service';
 })
 export class GameComponent implements OnInit {
   @Input()
-  public game!: Game;
+  public game!: UIGame;
 
   public zoom = 1;
   public get playerCenterX(): number {
-    const player = this.playerService.getPlayer(this.game);
-    return player.position.x + player.size.x / 2;
+    const player = this.game.getCurrentPlayer();
+    return player.getPosition().x + player.getSize().x / 2;
   };
   public get playerCenterY(): number {
-    const player = this.playerService.getPlayer(this.game);
-    return player.position.y + player.size.y / 2;
+    const player = this.game.getCurrentPlayer();
+    return player.getPosition().y + player.getSize().y / 2;
   };
-
-  public constructor(private playerService: PlayerService) {}
   
   public ngOnInit(): void {
     

@@ -18,6 +18,11 @@ import { AuthenticationResultComposer } from './message-composers/authentication
 import { UserService } from './user.service';
 import { ConnectionClosedComposer } from './message-composers/connection-closed-composer';
 import { UserPersistenceService } from './user-persistence.service';
+import { ActionStartedComposer } from './message-composers/action-started-composer';
+import { PerformActionHandler } from './message-handlers/perform-action-handler';
+import { ActionCompletedComposer } from './message-composers/action-completed-composer';
+import { GameObjectRemovedComposer } from './message-composers/game-object-removed-composer';
+import { ActionCanceledComposer } from './message-composers/action-canceled-composer';
 
 @Module({
   imports: [],
@@ -34,11 +39,16 @@ import { UserPersistenceService } from './user-persistence.service';
     GameObjectService,
     UserService,
     SetDirectionHandler,
+    PerformActionHandler,
     AuthenticationResultComposer,
     ConnectionClosedComposer,
     CompleteGameStateComposer,
     PlayerJoinedComposer,
     GameObjectNewPositionComposer,
+    ActionStartedComposer,
+    ActionCompletedComposer,
+    ActionCanceledComposer,
+    GameObjectRemovedComposer,
     UserPersistenceService,
   ],
 })

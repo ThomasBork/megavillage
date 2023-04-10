@@ -2,9 +2,10 @@
   class="game-object-container"
   [ngStyle]="{
     backgroundColor: getBackgroundColor(),
-    left: gameObject.position.x + 'px',
-    top: gameObject.position.y + 'px',
-    width: gameObject.size.x + 'px',
-    height: gameObject.size.y + 'px'
+    left: gameObject.getPosition().x + 'px',
+    top: gameObject.getPosition().y + 'px',
+    width: gameObject.getSize().x + 'px',
+    height: gameObject.getSize().y + 'px',
+    border: getBorder()
   }"
-></div>
+>{{getText()}}</div>

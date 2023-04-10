@@ -13,7 +13,7 @@ import { User } from 'src/shared/user/user';
   providedIn: 'root'
 })
 export class UserService {
-  public user?: User;
+  private user?: User;
   private baseUrl: string;
   public constructor(private httpClient: HttpClient) { 
     this.baseUrl = 'http://localhost:3000/user/';
@@ -40,7 +40,18 @@ export class UserService {
     const authenticationRequest: AuthenticationRequest = {
       authenticationToken: authenticationToken,
     };
-    
+
     return this.httpClient.post<AuthenticationResult>(this.baseUrl + 'authenticate', authenticationRequest, {});
+  }
+
+  public getUser(): User {
+    if (!this.user) {
+      throw new Error('User not authenticated.');
+    }
+    return this.user;
+  }
+
+  public setUser(user: User): void {
+    this.user = user;
   }
 }

@@ -11,6 +11,7 @@ export class GameObjectNewPositionHandlerService {
 
   public handle(message: ServerMessageGameObjectNewPosition): void {
     const gameObject = this.gameService.getGameObject(message.gameObjectId);
-    gameObject.position = message.newPosition;
+    gameObject.setPosition(message.newPosition);
+    this.gameService.updateCurrentTargetObject();
   }
 }

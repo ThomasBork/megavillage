@@ -3,7 +3,7 @@
   [ngStyle]="{transform: getTransform()}"
 >
   <app-game-object
-    *ngFor="let gameObject of game.gameObjects"
+    *ngFor="let gameObject of game.getGameObjects()"
     [gameObject]="gameObject"
   ></app-game-object>
 </div>

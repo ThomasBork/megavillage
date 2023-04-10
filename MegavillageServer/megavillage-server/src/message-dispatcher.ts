@@ -11,6 +11,8 @@ import { GameManager } from './game-manager';
 import { CompleteGameStateComposer } from './message-composers/complete-game-state-composer';
 import { ConnectionManager } from './connection-manager';
 import { ConnectionClosedComposer } from './message-composers/connection-closed-composer';
+import { PerformActionHandler } from './message-handlers/perform-action-handler';
+import { ClientMessagePerformAction } from './shared/messages/client/client-message-perform-action';
 
 @Injectable()
 export class MessageDispatcher {
@@ -23,6 +25,7 @@ export class MessageDispatcher {
     private completeGameStateComposer: CompleteGameStateComposer,
     private gameManager: GameManager,
     private connectionManager: ConnectionManager,
+    private performActionHandler: PerformActionHandler,
   ) {
     this.logger = new Logger('MessageDispatcher');
   }
@@ -68,6 +71,13 @@ export class MessageDispatcher {
         this.setDirectionHandler.handle(
           sender,
           messageContainer.message as ClientMessageSetDirection,
+        );
+        break;
+      }
+      case ClientMessageType.performAction: {
+        this.performActionHandler.handle(
+          sender,
+          messageContainer.message as ClientMessagePerformAction,
         );
         break;
       }

@@ -11,6 +11,14 @@ import { AuthenticationResultHandlerService } from './message-handlers/authentic
 import { ServerMessageAuthenticationResult } from 'src/shared/messages/server/server-message-authentication-result';
 import { ServerMessageConnectionClosed } from 'src/shared/messages/server/server-message-connection-closed';
 import { ConnectionClosedHandlerService } from './message-handlers/connection-closed-handler.service';
+import { ActionStartedHandlerService } from './message-handlers/action-started-handler.service';
+import { ServerMessageActionStarted } from 'src/shared/messages/server/server-message-action-started';
+import { ActionCompletedHandlerService } from './message-handlers/action-completed-handler.service';
+import { GameObjectRemovedHandlerService } from './message-handlers/game-object-removed-handler.service';
+import { ServerMessageActionCompleted } from 'src/shared/messages/server/server-message-action-completed';
+import { ServerMessageGameObjectRemoved } from 'src/shared/messages/server/server-message-game-object-removed';
+import { ActionCanceledHandlerService } from './message-handlers/action-canceled-handler.service';
+import { ServerMessageActionCanceled } from 'src/shared/messages/server/server-message-action-canceled';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +30,10 @@ export class MessageDispatcherService {
     private completeGameStateHandlerService: CompleteGameStateHandlerService,
     private playerJoinedHandlerService: PlayerJoinedHandlerService,
     private gameObjectNewPositionHandlerService: GameObjectNewPositionHandlerService,
+    private actionStartedHandlerService: ActionStartedHandlerService,
+    private actionCompletedHandlerService: ActionCompletedHandlerService,
+    private actionCanceledHandlerService: ActionCanceledHandlerService,
+    private gameObjectRemovedHandlerService: GameObjectRemovedHandlerService,
   ) { }
 
   public handleMessage<T extends object>(messageContainer: ServerMessageContainer<T>): void {
@@ -44,6 +56,22 @@ export class MessageDispatcherService {
       }
       case ServerMessageType.gameObjectNewPosition: {
         this.gameObjectNewPositionHandlerService.handle(messageContainer.message as ServerMessageGameObjectNewPosition);
+        break;
+      }
+      case ServerMessageType.actionStarted: {
+        this.actionStartedHandlerService.handle(messageContainer.message as ServerMessageActionStarted);
+        break;
+      }
+      case ServerMessageType.actionCompleted: {
+        this.actionCompletedHandlerService.handle(messageContainer.message as ServerMessageActionCompleted);
+        break;
+      }
+      case ServerMessageType.gameObjectRemoved: {
+        this.gameObjectRemovedHandlerService.handle(messageContainer.message as ServerMessageGameObjectRemoved);
+        break;
+      }
+      case ServerMessageType.actionCanceled: {
+        this.actionCanceledHandlerService.handle(messageContainer.message as ServerMessageActionCanceled);
         break;
       }
       default:
