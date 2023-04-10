@@ -1,8 +1,32 @@
+<div class="header">
+  <span class="title">Megavillage</span>
+  <span class="user-buttons">
+    <span 
+      class="button"
+      (click)="goToCreateUser()"
+    >Create user</span>
+    <span 
+      *ngIf="!authenticationToken"
+      class="button"
+      (click)="goToLogIn()"
+    >Log in</span>
+    <span 
+      *ngIf="authenticationToken"
+      class="button"
+      (click)="logOut()"
+    >Log out</span>
+  </span>
+</div>
+
 <ng-container *ngIf="!game">
-  <input type="text" [(ngModel)]="playerName"/>
-  <button (click)="connect()">Connect!</button>
+  <ng-container *ngIf="screen === 'CreateUser'">
+    <app-create-user (userCreated)="onUserCreated($event)"></app-create-user>
+  </ng-container>
+  <ng-container *ngIf="screen === 'LogIn'">
+    <app-log-in (loggedIn)="onLoggedIn($event)"></app-log-in>
+  </ng-container>
 </ng-container>
-<ng-container *ngIf="game">
+<ng-container *ngIf="game && screen === 'Game'">
   <div 
     class="game"
     tabindex="0"

@@ -1,4 +1,4 @@
 export enum ClientMessageType {
-  joinGame = 'joinGame',
+  authenticate = 'authenticate',
   setDirection = 'setDirection',
 }

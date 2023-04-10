@@ -13,16 +13,16 @@ export class SetDirectionComposerService {
   public compose(): ClientMessageContainer<ClientMessageSetDirection> {
     let x = 0;
     let y = 0;
-    if (this.keyboardService.isButtonPressed('a')) {
+    if (this.keyboardService.isButtonPressed('a') || this.keyboardService.isButtonPressed('ArrowLeft')) {
       x -= 1;
     }
-    if (this.keyboardService.isButtonPressed('d')) {
+    if (this.keyboardService.isButtonPressed('d') || this.keyboardService.isButtonPressed('ArrowRight')) {
       x += 1;
     }
-    if (this.keyboardService.isButtonPressed('w')) {
+    if (this.keyboardService.isButtonPressed('w') || this.keyboardService.isButtonPressed('ArrowUp')) {
       y -= 1;
     }
-    if (this.keyboardService.isButtonPressed('s')) {
+    if (this.keyboardService.isButtonPressed('s') || this.keyboardService.isButtonPressed('ArrowDown')) {
       y += 1;
     }
     return {

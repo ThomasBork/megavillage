@@ -15,7 +15,7 @@ export class SetDirectionHandler {
   ) {}
 
   public handle(sender: Connection, message: ClientMessageSetDirection): void {
-    const player = this.gameManager.getPlayer(sender.playerId);
+    const player = this.gameManager.getPlayerByUserId(sender.getUserId());
     const direction = this.getNormalizedDirection(message.newDirection);
     this.inputBufferService.queueDirectionForPlayer(player.id, direction);
   }

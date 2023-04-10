@@ -9,15 +9,19 @@ import { CompleteGameStateComposer } from './message-composers/complete-game-sta
 import { GameObjectNewPositionComposer } from './message-composers/game-object-new-position-composer';
 import { PlayerJoinedComposer } from './message-composers/player-joined-composer';
 import { MessageDispatcher } from './message-dispatcher';
-import { JoinGameHandler } from './message-handlers/join-game-handler';
 import { SetDirectionHandler } from './message-handlers/set-direction-handler';
 import { VectorService } from './vector.service';
 import { InputBufferService } from './game-loop/input-buffer/input-buffer.service';
 import { GameObjectService } from './game-object.service';
+import { UserController } from './user.controller';
+import { AuthenticationResultComposer } from './message-composers/authentication-result-composer';
+import { UserService } from './user.service';
+import { ConnectionClosedComposer } from './message-composers/connection-closed-composer';
+import { UserPersistenceService } from './user-persistence.service';
 
 @Module({
   imports: [],
-  controllers: [AppController],
+  controllers: [AppController, UserController],
   providers: [
     AppService,
     AppGateway,
@@ -28,11 +32,14 @@ import { GameObjectService } from './game-object.service';
     VectorService,
     InputBufferService,
     GameObjectService,
-    JoinGameHandler,
+    UserService,
     SetDirectionHandler,
+    AuthenticationResultComposer,
+    ConnectionClosedComposer,
     CompleteGameStateComposer,
     PlayerJoinedComposer,
     GameObjectNewPositionComposer,
+    UserPersistenceService,
   ],
 })
 export class AppModule {}

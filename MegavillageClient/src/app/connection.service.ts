@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ClientMessageContainer } from 'src/shared/messages/client/client-message-container';
-import { ServerMessageContainer } from 'src/shared/messages/server/server-message-container';
-import { JoinGameComposerService } from './message-composers/join-game-composer.service';
 import { MessageDispatcherService } from './message-dispatcher.service';
+import { AuthenticateComposerService } from './message-composers/authenticate-composer.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +11,15 @@ export class ConnectionService {
 
   public constructor(
     private messageDispatcherService: MessageDispatcherService,
-    private joinGameComposerService: JoinGameComposerService,
+    private authenticateComposerService: AuthenticateComposerService,
   ) { }
 
-  public connect(playerName: string) {
+  public connect(authenticationToken: string) {
     this.ws = new WebSocket('ws://localhost:3000');
+
+    this.ws.onclose = (event: CloseEvent) => {
+      this.ws = undefined;
+    };
   
     this.ws.onopen = (event: Event) => {
       console.log('Connection was opened.');
@@ -25,9 +28,8 @@ export class ConnectionService {
         return;
       }
 
-      //this.ws.send('{"type":"joinGame", "message":{"playerName":"' + playerName + '"}}');
-      const joinGameMessage = this.joinGameComposerService.compose();
-      this.sendMessage(joinGameMessage);
+      const authenticateMessage = this.authenticateComposerService.compose(authenticationToken);
+      this.sendMessage(authenticateMessage);
     };
   
     this.ws.onmessage = (event: MessageEvent<string>) => {

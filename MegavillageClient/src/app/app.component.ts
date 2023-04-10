@@ -5,6 +5,9 @@ import { GameService } from './game.service';
 import { KeyboardService } from './keyboard.service';
 import { SetDirectionComposerService } from './message-composers/set-direction-composer.service';
 import { PlayerService } from './player.service';
+import { UserService } from './user.service';
+import { CreateUserResult } from 'src/shared/user/create-user-result';
+import { LogInResult } from 'src/shared/user/log-in-result';
 
 @Component({
   selector: 'app-root',
@@ -13,27 +16,25 @@ import { PlayerService } from './player.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
   public game?: Game;
-  public get playerName(): string {
-    return this.playerService.playerName;
-  }
-  public set playerName(name: string) {
-    this.playerService.playerName = name;
-  }
+  public authenticationToken: string | null;
+  public screen: 'CreateUser' | 'LogIn' | 'Game';
 
   private movementKeys: string[];
 
   public constructor(
     private connectionService: ConnectionService,
     private gameService: GameService,
-    private playerService: PlayerService,
     private keyboardService: KeyboardService,
     private setDirectionComposerService: SetDirectionComposerService,
   ) {
-    this.movementKeys = ['a', 's', 'd', 'w'];
+    this.movementKeys = ['a', 's', 'd', 'w', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ArrowUp'];
+    this.screen = 'LogIn';
+    this.authenticationToken = null;
   }
 
   public ngOnInit(): void {
     this.gameService.onGameStateReceived.subscribe(game => {
+      this.screen = 'Game';
       this.game = game;
       setTimeout(() => (document.getElementsByClassName('game')[0] as HTMLElement).focus(), 0);
     });
@@ -44,7 +45,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   public connect() {
-    this.connectionService.connect(this.playerName);
+    if (!this.authenticationToken) {
+      throw new Error('Unable to connect without an authentication token.');
+    }
+    this.connectionService.connect(this.authenticationToken);
   }
 
 
@@ -73,5 +77,26 @@ export class AppComponent implements OnInit, OnDestroy {
       this.connectionService.sendMessage(setDirectionMessage);
       return;
     }
+  }
+
+  public goToCreateUser(): void {
+    this.screen = 'CreateUser';
+  }
+
+  public goToLogIn(): void {
+    this.screen = 'LogIn';
+  }
+
+  public logOut(): void {
+    this.goToLogIn();
+  }
+
+  public onUserCreated(result: CreateUserResult): void {
+    this.goToLogIn();
+  }
+
+  public onLoggedIn(result: LogInResult): void {
+    this.authenticationToken = result.authenticationToken;
+    this.connect();
   }
 }

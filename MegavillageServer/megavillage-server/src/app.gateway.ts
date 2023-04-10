@@ -20,14 +20,12 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   public async handleDisconnect(client: WebSocket): Promise<void> {
-    this.logger.log("Client disconnected.");
-    // const connection = this.connectionsManager.getConnectionFromWebSocketClient(client);
-    // this.connectionsManager.removeConnection(client);
-    // if (connection && connection.user) {
-    //   const messageContent = `${connection.user.userName} disconnected.`;
-    //   const message = new ContractChatMessageSentMessage(connection.user.id, connection.user.userName, messageContent, ContractServerChatMessageType.userDisconnected);
-    //   this.connectionsManager.sendMessageToAll(message);
-    // }
+    this.logger.log('Client disconnected.');
+    const connection = this.connectionManager.tryGetConnectionForWebSocket(client);
+    // Sometimes this connection has already been removed, if the disconnect was initiated by the server and not the client.
+    if (connection) {
+      this.connectionManager.removeConnection(connection);
+    }
   }
 
   public async handleConnection(client: WebSocket, ...args: any[]): Promise<void> {
@@ -41,6 +39,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message
       );
     };
-    this.connectionManager.connections.push(connection);
+    this.connectionManager.addConnection(connection);
   }
 }

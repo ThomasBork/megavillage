@@ -6,6 +6,9 @@ import { GameObjectType } from './shared/game-state/game-object-type';
 import { Player } from './shared/game-state/player';
 import { ServerMessageContainer } from './shared/messages/server/server-message-container';
 import { Connection } from './connection';
+import { VectorService } from './vector.service';
+import { UserService } from './user.service';
+import { PlayerJoinedComposer } from './message-composers/player-joined-composer';
 
 @Injectable()
 export class GameManager {
@@ -23,7 +26,12 @@ export class GameManager {
   private treeHeight = 100;
   private builderNextGameObjectId: number;
 
-  public constructor(private connectionManager: ConnectionManager) {
+  public constructor(
+    private connectionManager: ConnectionManager,
+    private vectorService: VectorService,
+    private userService: UserService,
+    private playerJoinedComposer: PlayerJoinedComposer,
+  ) {
     this.builderNextGameObjectId = 0;
     const gameObjects = this.buildWorld();
     this.game = {
@@ -40,7 +48,8 @@ export class GameManager {
 
   public getConnectionsForAllPlayers(): Connection[] {
     return this.getPlayers()
-      .map((p) => this.connectionManager.getConnectionForPlayer(p.id));
+      .map((p) => this.connectionManager.getConnectionForUser(p.userId))
+      .filter((c) => c !== undefined);
   }
 
   public getGame(): Game {
@@ -50,18 +59,44 @@ export class GameManager {
     return this.game;
   }
 
-  public getPlayer(playerId: number): Player {
-    const player = this.getPlayers().find((p) => p.id === playerId);
-    if (!player) {
-      throw new Error('Player does not exist: "' + playerId + '".');
-    }
-    return player;
+  public getPlayerByUserId(userId: number): Player | undefined {
+    return this.getPlayers()
+      .find((p) => p.userId === userId);
   }
 
   public getPlayers(): Player[] {
     return this.getGame()
       .gameObjects
       .filter(g => g.type === GameObjectType.player) as Player[];
+  }
+
+  public addPlayerForUser(userId: number): void {
+    const existingPlayer = this.getPlayerByUserId(userId);
+    if (existingPlayer) {
+      return;
+    }
+    const user = this.userService.getUserWithId(userId);
+    const playerId = this.game.nextGameObjectId++;
+    const player: Player = {
+      id: playerId,
+      type: GameObjectType.player,
+      name: user.userName,
+      position: this.vectorService.buildVector(0, 0),
+      direction: this.vectorService.buildVector(0, 0),
+      blocksMovement: false,
+      size: this.vectorService.buildVector(100, 100),
+      speed: 250,
+      userId: userId,
+    };
+    this.game.gameObjects.push(player);
+
+    const connectionsOfOtherUsers = this
+      .getConnectionsForAllPlayers()
+      .filter((c) => c.getUserId() !== userId);
+    const playerJoinedMessage = this.playerJoinedComposer.compose(player);
+    for (const connectionOfOtherPlayer of connectionsOfOtherUsers) {
+      connectionOfOtherPlayer.sendMessage(playerJoinedMessage);
+    }
   }
 
   private buildWorld(): GameObject[] {
