@@ -1,11 +1,12 @@
 <div 
   class="game-object-container"
   [ngStyle]="{
-    backgroundColor: getBackgroundColor(),
-    left: gameObject.getPosition().x + 'px',
-    top: gameObject.getPosition().y + 'px',
+    left: gameObject.getPosition().x - gameObject.getSize().x / 2 + 'px',
+    top: gameObject.getPosition().y - gameObject.getSize().y / 2 + 'px',
     width: gameObject.getSize().x + 'px',
     height: gameObject.getSize().y + 'px',
     border: getBorder()
   }"
->{{getText()}}</div>
+>
+  <img class="image" [src]="getImagePath()" />
+</div>

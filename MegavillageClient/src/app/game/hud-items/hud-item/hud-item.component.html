@@ -1,0 +1,4 @@
+<div class="container">
+  <img class="image" [src]="getImagePath()" />
+  <div class="resource-stack-quantity" *ngIf="isResourceStack()">{{getResourceQuantity()}}</div>
+</div>

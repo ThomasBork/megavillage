@@ -8,6 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CreateUserComponent } from './user/create-user/create-user.component';
 import { LogInComponent } from './user/log-in/log-in.component';
+import { HudItemsComponent } from './game/hud-items/hud-items.component';
+import { HudItemComponent } from './game/hud-items/hud-item/hud-item.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +17,9 @@ import { LogInComponent } from './user/log-in/log-in.component';
     GameComponent,
     GameObjectComponent,
     CreateUserComponent,
-    LogInComponent
+    LogInComponent,
+    HudItemsComponent,
+    HudItemComponent
   ],
   imports: [
     BrowserModule,

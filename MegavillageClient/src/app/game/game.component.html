@@ -1,9 +1,15 @@
-<div 
-  class="game-container" 
-  [ngStyle]="{transform: getTransform()}"
->
-  <app-game-object
-    *ngFor="let gameObject of game.getGameObjects()"
-    [gameObject]="gameObject"
-  ></app-game-object>
+<div class="game-container">
+  <div 
+    class="game-content" 
+    [ngStyle]="{transform: getTransform()}"
+  >
+    <app-game-object
+      *ngFor="let gameObject of game.getGameObjects()"
+      [gameObject]="gameObject"
+    ></app-game-object>
+  </div>
+
+  <div class="items-container">
+    <app-hud-items [player]="game.getCurrentPlayer()"></app-hud-items>
+  </div>
 </div>

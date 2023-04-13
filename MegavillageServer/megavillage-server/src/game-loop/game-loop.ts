@@ -1,5 +1,4 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import { ConnectionManager } from 'src/connection-manager';
 import { GameManager } from 'src/game-manager';
 import { GameObjectNewPositionComposer } from 'src/message-composers/game-object-new-position-composer';
 import { Game } from 'src/shared/game-state/game';
@@ -13,6 +12,12 @@ import { GameObjectService } from 'src/game-object.service';
 import { ActionCompletedComposer } from 'src/message-composers/action-completed-composer';
 import { GameObjectRemovedComposer } from 'src/message-composers/game-object-removed-composer';
 import { ActionCanceledComposer } from 'src/message-composers/action-canceled-composer';
+import { PlayerActionType } from 'src/shared/game-state/player-action-type';
+import { ItemType } from 'src/shared/game-state/item-type';
+import { ItemResourceStack } from 'src/shared/game-state/item-resource-stack';
+import { ResourceType } from 'src/shared/game-state/resource-type';
+import { ItemResourceStackQuantityChangedComposer } from 'src/message-composers/item-resource-stack-quantity-changed-composer';
+import { ItemGainedComposer } from 'src/message-composers/item-gained-composer';
 
 @Injectable()
 export class GameLoop implements OnApplicationBootstrap {
@@ -32,6 +37,8 @@ export class GameLoop implements OnApplicationBootstrap {
     private gameObjectRemovedComposer: GameObjectRemovedComposer,
     private inputBufferService: InputBufferService,
     private gameObjectService: GameObjectService,
+    private itemResourceStackQuantityChangedComposer: ItemResourceStackQuantityChangedComposer,
+    private itemGainedComposer: ItemGainedComposer,
   ) {
     this.tickFrequencyInMilliseconds = 50;
   }
@@ -59,17 +66,87 @@ export class GameLoop implements OnApplicationBootstrap {
       if (gameObject.type === GameObjectType.player) {
         const player = gameObject as Player;
         if (player.action) {
-          player.action.timeRemainingInMilliseconds -= this.tickFrequencyInMilliseconds;
-          if (player.action.timeRemainingInMilliseconds < 0) {
+          const action = player.action;
+          action.timeRemainingInMilliseconds -= this.tickFrequencyInMilliseconds;
+          if (action.timeRemainingInMilliseconds < 0) {
             const actionCompletedMessage = this.actionCompletedComposer.compose(player.id);
             this.gameManager.queueMessageToAllPlayers(actionCompletedMessage);
-            this.gameManager.removeObject(player.action.targetGameObjectId);
-            const targetRemovedMessage = this.gameObjectRemovedComposer.compose(player.action.targetGameObjectId);
-            this.gameManager.queueMessageToAllPlayers(targetRemovedMessage);
+
+            switch (action.type) {
+              case PlayerActionType.chop: {
+                this.gameManager.removeObject(action.targetGameObjectId);
+                const targetRemovedMessage = this.gameObjectRemovedComposer.compose(action.targetGameObjectId);
+                this.gameManager.queueMessageToAllPlayers(targetRemovedMessage);
+
+                const woodToGive = 20 + Math.floor(Math.random() * 10);
+                this.giveResourcesToPlayer(player, ResourceType.wood, woodToGive);
+                break;
+              }
+              default: throw new Error('No logic for handling player action: "' + action.type + '".');
+            }
+
             player.action = null;
           }
         }
       }
+    }
+  }
+
+  private giveResourcesToPlayer(player:Player, resourceType: ResourceType, quantity: number): void {
+    let quantityLeftToGive = quantity;
+    for (const item of player.items) {
+      if (item.type === ItemType.resourceStack) {
+        const resourceStack = item as ItemResourceStack;
+        if (resourceStack.resourceType === resourceType) {
+          const spaceInStack = resourceStack.maxQuantity - resourceStack.quantity;
+          if (spaceInStack > 0) {
+            const quantityToAddToStack = Math.min(spaceInStack, quantityLeftToGive);
+            const oldQuantity = resourceStack.quantity;
+            resourceStack.quantity += quantityToAddToStack;
+            quantityLeftToGive -= quantityToAddToStack;
+
+            const stackQuantityChangedMessage = this.itemResourceStackQuantityChangedComposer.compose(
+              player.id, 
+              resourceStack.id,
+              oldQuantity,
+              resourceStack.quantity);
+            this.gameManager.queueMessageToAllPlayers(stackQuantityChangedMessage);
+
+            if (quantityLeftToGive === 0) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    const maxQuantity = this.getResourceStackMaxQuantity(resourceType);
+    while (
+      quantityLeftToGive > 0 
+      && player.items.length < player.maxItemCount
+    ) {
+      const quantityToAddToStack = Math.min(maxQuantity, quantityLeftToGive);
+      quantityLeftToGive -= quantityToAddToStack;
+      const itemResourceStack: ItemResourceStack = {
+        id: this.gameManager.getGame().nextItemId++,
+        actionsEnabledByItem: [],
+        maxQuantity: maxQuantity,
+        name: 'Stack of ' + resourceType,
+        quantity: quantityToAddToStack,
+        resourceType: resourceType,
+        type: ItemType.resourceStack,
+      };
+      player.items.push(itemResourceStack);
+      const itemGainedMessage = this.itemGainedComposer.compose(player.id, itemResourceStack);
+      this.gameManager.queueMessageToAllPlayers(itemGainedMessage);
+    }
+  }
+
+  private getResourceStackMaxQuantity(resourceType: ResourceType): number {
+    switch(resourceType) {
+      case ResourceType.wood: return 50;
+      case ResourceType.stone: return 30;
+      default: throw new Error('No resource stack max quantity for: "' + resourceType + '".');
     }
   }
 

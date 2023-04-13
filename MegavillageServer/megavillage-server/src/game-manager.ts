@@ -9,6 +9,8 @@ import { Connection } from './connection';
 import { VectorService } from './vector.service';
 import { UserService } from './user.service';
 import { PlayerJoinedComposer } from './message-composers/player-joined-composer';
+import { ItemType } from './shared/game-state/item-type';
+import { PlayerActionType } from './shared/game-state/player-action-type';
 
 @Injectable()
 export class GameManager {
@@ -22,8 +24,10 @@ export class GameManager {
   private mapMaxY = this.mapHeight / 2;
   private rockWidth = 50;
   private rockHeight = 50;
-  private treeWidth = 100;
+  private treeWidth = 80;
   private treeHeight = 100;
+  private shopWidth = 600;
+  private shopHeight = 200;
   private builderNextGameObjectId: number;
 
   public constructor(
@@ -36,7 +40,9 @@ export class GameManager {
     const gameObjects = this.buildWorld();
     this.game = {
       nextGameObjectId: this.builderNextGameObjectId,
+      nextItemId: 1,
       gameObjects: gameObjects,
+      sharedResources: [],
     };
   }
 
@@ -99,10 +105,17 @@ export class GameManager {
       position: this.vectorService.buildVector(0, 0),
       direction: this.vectorService.buildVector(0, 0),
       blocksMovement: false,
-      size: this.vectorService.buildVector(100, 100),
+      size: this.vectorService.buildVector(80, 100),
       speed: 250,
       userId: userId,
       action: null,
+      items: [{
+        id: this.game.nextItemId++,
+        name: 'Starting Axe',
+        type: ItemType.axe,
+        actionsEnabledByItem: [PlayerActionType.chop],
+      }],
+      maxItemCount: 4,
     };
     this.game.gameObjects.push(player);
 
@@ -132,13 +145,26 @@ export class GameManager {
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 6),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 6),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 10, this.treeHeight * 10),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -3, this.treeHeight * -2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -3),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -4),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -2, this.treeHeight * -5),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -2),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -8, this.treeHeight * -2),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -3),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -4),
+      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -5),
     );
+    objects.push(this.buildShop(this.builderNextGameObjectId++, 0, -400));
     return objects;
+  }
+
+  private buildShop(id: number, x: number, y: number): GameObject {
+    return {
+      blocksMovement: true,
+      id: id,
+      position: { x: x, y: y },
+      size: { x: this.shopWidth, y: this.shopHeight },
+      type: GameObjectType.shop,
+      direction: { x: 0, y: 0 },
+      speed: 0,
+    };
   }
 
   private buildRock(id: number, x: number, y: number): GameObject {

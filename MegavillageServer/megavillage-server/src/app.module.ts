@@ -23,6 +23,8 @@ import { PerformActionHandler } from './message-handlers/perform-action-handler'
 import { ActionCompletedComposer } from './message-composers/action-completed-composer';
 import { GameObjectRemovedComposer } from './message-composers/game-object-removed-composer';
 import { ActionCanceledComposer } from './message-composers/action-canceled-composer';
+import { ItemResourceStackQuantityChangedComposer } from './message-composers/item-resource-stack-quantity-changed-composer';
+import { ItemGainedComposer } from './message-composers/item-gained-composer';
 
 @Module({
   imports: [],
@@ -49,6 +51,8 @@ import { ActionCanceledComposer } from './message-composers/action-canceled-comp
     ActionCompletedComposer,
     ActionCanceledComposer,
     GameObjectRemovedComposer,
+    ItemGainedComposer,
+    ItemResourceStackQuantityChangedComposer,
     UserPersistenceService,
   ],
 })

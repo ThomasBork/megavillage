@@ -8,4 +8,8 @@ export enum ServerMessageType {
   actionCanceled = 'actionCanceled',
   actionCompleted = 'actionCompleted',
   gameObjectRemoved = 'gameObjectRemoved',
+  itemGained = 'itemGained',
+  itemResourceStackQuantityChanged = 'itemResourceStackQuantityChanged',
+  itemRemoved = 'itemRemoved',
+  gameResourceQuantityChanged = 'gameResourceQuantityChanged',
 }

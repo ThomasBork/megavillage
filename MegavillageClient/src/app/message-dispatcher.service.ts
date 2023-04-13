@@ -19,6 +19,10 @@ import { ServerMessageActionCompleted } from 'src/shared/messages/server/server-
 import { ServerMessageGameObjectRemoved } from 'src/shared/messages/server/server-message-game-object-removed';
 import { ActionCanceledHandlerService } from './message-handlers/action-canceled-handler.service';
 import { ServerMessageActionCanceled } from 'src/shared/messages/server/server-message-action-canceled';
+import { ItemGainedHandlerService } from './message-handlers/item-gained-handler.service';
+import { ServerMessageItemGained } from 'src/shared/messages/server/server-message-item-gained';
+import { ItemResourceStackQuantityChangedHandlerService } from './message-handlers/item-resource-stack-quantity-changed-handler.service';
+import { ServerMessageItemResourceStackQuantityChanged } from 'src/shared/messages/server/server-message-item-resource-stack-quantity-changed';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +38,8 @@ export class MessageDispatcherService {
     private actionCompletedHandlerService: ActionCompletedHandlerService,
     private actionCanceledHandlerService: ActionCanceledHandlerService,
     private gameObjectRemovedHandlerService: GameObjectRemovedHandlerService,
+    private itemGainedHandlerService: ItemGainedHandlerService,
+    private itemResourceStackQuantityChangedHandlerService: ItemResourceStackQuantityChangedHandlerService,
   ) { }
 
   public handleMessage<T extends object>(messageContainer: ServerMessageContainer<T>): void {
@@ -72,6 +78,14 @@ export class MessageDispatcherService {
       }
       case ServerMessageType.actionCanceled: {
         this.actionCanceledHandlerService.handle(messageContainer.message as ServerMessageActionCanceled);
+        break;
+      }
+      case ServerMessageType.itemGained: {
+        this.itemGainedHandlerService.handle(messageContainer.message as ServerMessageItemGained);
+        break;
+      }
+      case ServerMessageType.itemResourceStackQuantityChanged: {
+        this.itemResourceStackQuantityChangedHandlerService.handle(messageContainer.message as ServerMessageItemResourceStackQuantityChanged);
         break;
       }
       default:

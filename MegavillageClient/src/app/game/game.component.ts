@@ -13,11 +13,11 @@ export class GameComponent implements OnInit {
   public zoom = 1;
   public get playerCenterX(): number {
     const player = this.game.getCurrentPlayer();
-    return player.getPosition().x + player.getSize().x / 2;
+    return player.getPosition().x;
   };
   public get playerCenterY(): number {
     const player = this.game.getCurrentPlayer();
-    return player.getPosition().y + player.getSize().y / 2;
+    return player.getPosition().y;
   };
   
   public ngOnInit(): void {

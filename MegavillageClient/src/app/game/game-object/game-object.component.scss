@@ -1,4 +1,9 @@
 .game-object-container {
   position: absolute;
   color: white;
+
+  .image {
+    height: 100%;
+    width: 100%;
+  }
 }
