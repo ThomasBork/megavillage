@@ -34,4 +34,11 @@ export class VectorService {
       y: vectorA.y + vectorB.y,
     };
   }
+
+  public subtractVector(baseVector: Vector2, minusVector: Vector2): Vector2 {
+    return {
+      x: baseVector.x - minusVector.x,
+      y: baseVector.y + minusVector.y,
+    };
+  }
 }

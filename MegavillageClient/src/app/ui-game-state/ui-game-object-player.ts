@@ -2,12 +2,15 @@ import { Player } from 'src/shared/game-state/player';
 import { UIGameObject } from './ui-game-object';
 import { PlayerAction } from 'src/shared/game-state/player-action';
 import { Item } from 'src/shared/game-state/item';
+import { Vector2 } from 'src/shared/game-state/vector2';
 
 export class UIGameObjectPlayer extends UIGameObject {
   public isCurrentPlayer: boolean;
+  public lastNonzeroMovement: Vector2 | null;
   public constructor(serverState: Player, isCurrentPlayer: boolean) {
     super(serverState);
     this.isCurrentPlayer = isCurrentPlayer;
+    this.lastNonzeroMovement = null;
   }
   public setAction(action: PlayerAction | null): void {
     this.getPlayerServerState().action = action;

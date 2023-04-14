@@ -8,5 +8,6 @@
     border: getBorder()
   }"
 >
-  <img class="image" [src]="getImagePath()" />
+  <app-player *ngIf="isPlayer()" [player]="getPlayer()"></app-player>
+  <img *ngIf="!isPlayer()" class="image" [src]="getImagePath()" />
 </div>

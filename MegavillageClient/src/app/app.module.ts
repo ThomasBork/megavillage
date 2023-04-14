@@ -10,6 +10,8 @@ import { CreateUserComponent } from './user/create-user/create-user.component';
 import { LogInComponent } from './user/log-in/log-in.component';
 import { HudItemsComponent } from './game/hud-items/hud-items.component';
 import { HudItemComponent } from './game/hud-items/hud-item/hud-item.component';
+import { AnimationComponent } from './common/animation/animation.component';
+import { PlayerComponent } from './game/game-object/player/player.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,9 @@ import { HudItemComponent } from './game/hud-items/hud-item/hud-item.component';
     CreateUserComponent,
     LogInComponent,
     HudItemsComponent,
-    HudItemComponent
+    HudItemComponent,
+    AnimationComponent,
+    PlayerComponent
   ],
   imports: [
     BrowserModule,

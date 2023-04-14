@@ -1,0 +1,13 @@
+<div 
+  class="container" 
+  [ngClass]="{'flipped': isFlippedHorizontally()}"
+>
+  <app-animation
+    *ngIf="isPerformingAction()"
+    [animationFolderPath]="getActionAnimationFolderPath()"
+    [imageCount]="getActionAnimationImageCount()"
+    [maxDuration]="getActionAnimationMaxDuration()"
+    [(timePassed)]="currentAnimationTimePassed"
+  ></app-animation>
+  <img *ngIf="!isPerformingAction()" class="image" [src]="getImagePath()" />
+</div>
