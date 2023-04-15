@@ -15,6 +15,17 @@ export class UserService {
   }
 
   public createUser(userName: string, rawPassword: string): CreateUserResult {
+    if (userName.length === 0) {
+      return {
+        errorMessage: 'User name must not be empty.',
+      };
+    }
+    if (rawPassword.length === 0) {
+      return {
+        errorMessage: 'Password must not be empty.',
+      };
+    }
+    
     const existingUser = this.userPersistenceService.findUserWithUserName(userName);
     if (existingUser) {
       return {

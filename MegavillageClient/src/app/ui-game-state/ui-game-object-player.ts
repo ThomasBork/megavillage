@@ -7,10 +7,12 @@ import { Vector2 } from 'src/shared/game-state/vector2';
 export class UIGameObjectPlayer extends UIGameObject {
   public isCurrentPlayer: boolean;
   public lastNonzeroMovement: Vector2 | null;
+  public lastNonzeroXMovement: number | null;
   public constructor(serverState: Player, isCurrentPlayer: boolean) {
     super(serverState);
     this.isCurrentPlayer = isCurrentPlayer;
     this.lastNonzeroMovement = null;
+    this.lastNonzeroXMovement = null;
   }
   public setAction(action: PlayerAction | null): void {
     this.getPlayerServerState().action = action;

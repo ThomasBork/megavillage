@@ -20,6 +20,9 @@ export class GameObjectNewPositionHandlerService {
     if (gameObject instanceof UIGameObjectPlayer) {
       const calculatedMovement = this.vectorService.subtractVector(message.newPosition, message.oldPosition);
       gameObject.lastNonzeroMovement = calculatedMovement;
+      if (calculatedMovement.x !== 0) {
+        gameObject.lastNonzeroXMovement = calculatedMovement.x;
+      }
     }
     this.gameService.updateCurrentTargetObject();
   }

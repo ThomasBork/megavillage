@@ -30,6 +30,7 @@ export class PlayerComponent {
   public getActionAnimationImageCount(): number {
     switch (this.getAction().type) {
       case PlayerActionType.chop: return 2;
+      case PlayerActionType.mine: return 2;
       default: throw new Error ('No animation image count set for action type: "' + this.getAction().type.toString() + '".');
     }
   }
@@ -37,6 +38,7 @@ export class PlayerComponent {
   public getActionAnimationMaxDuration(): number {
     switch (this.getAction().type) {
       case PlayerActionType.chop: return 500;
+      case PlayerActionType.mine: return 100;
       default: throw new Error ('No animation image count set for action type: "' + this.getAction().type.toString() + '".');
     }
   }
@@ -46,8 +48,8 @@ export class PlayerComponent {
   }
 
   public isFlippedHorizontally(): boolean {
-    return this.player.lastNonzeroMovement !== null
-      && this.player.lastNonzeroMovement.x > 0;
+    return this.player.lastNonzeroXMovement !== null
+      && this.player.lastNonzeroXMovement > 0;
   }
 
   private getAction(): PlayerAction {

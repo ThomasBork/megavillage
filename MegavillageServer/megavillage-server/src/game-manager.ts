@@ -139,6 +139,13 @@ export class GameManager {
       objects.push(this.buildRock(this.builderNextGameObjectId++, this.mapMaxX - this.rockWidth, y));
     }
     objects.push(
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 2),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 4),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 7),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 8),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 9),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -3, this.rockHeight * 9),
+      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -4, this.rockHeight * 9),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 2),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 4, this.treeHeight * 2),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 2),
@@ -150,8 +157,8 @@ export class GameManager {
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -3),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -4),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -5),
+      this.buildShop(this.builderNextGameObjectId++, 0, -400),
     );
-    objects.push(this.buildShop(this.builderNextGameObjectId++, 0, -400));
     return objects;
   }
 

@@ -78,8 +78,17 @@ export class GameLoop implements OnApplicationBootstrap {
                 const targetRemovedMessage = this.gameObjectRemovedComposer.compose(action.targetGameObjectId);
                 this.gameManager.queueMessageToAllPlayers(targetRemovedMessage);
 
-                const woodToGive = 20 + Math.floor(Math.random() * 10);
+                const woodToGive = 15 + Math.floor(Math.random() * 8);
                 this.giveResourcesToPlayer(player, ResourceType.wood, woodToGive);
+                break;
+              }
+              case PlayerActionType.mine: {
+                this.gameManager.removeObject(action.targetGameObjectId);
+                const targetRemovedMessage = this.gameObjectRemovedComposer.compose(action.targetGameObjectId);
+                this.gameManager.queueMessageToAllPlayers(targetRemovedMessage);
+
+                const stoneToGive = 10 + Math.floor(Math.random() * 5);
+                this.giveResourcesToPlayer(player, ResourceType.stone, stoneToGive);
                 break;
               }
               default: throw new Error('No logic for handling player action: "' + action.type + '".');
