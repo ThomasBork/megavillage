@@ -3,8 +3,8 @@ import { Connection } from 'src/connection';
 import { GameManager } from 'src/game-manager';
 import { ActionStartedComposer } from 'src/message-composers/action-started-composer';
 import { GameObject } from 'src/shared/game-state/game-object';
-import { GameObjectType } from 'src/shared/game-state/game-object-type';
 import { Player } from 'src/shared/game-state/player';
+import { PlayerAction } from 'src/shared/game-state/player-action';
 import { PlayerActionType } from 'src/shared/game-state/player-action-type';
 import { ClientMessagePerformAction } from 'src/shared/messages/client/client-message-perform-action';
 
@@ -42,25 +42,36 @@ export class PerformActionHandler {
   }
 
   private canActionBePerformedOnTarget(player: Player, target: GameObject, actionType: PlayerActionType): boolean {
-    switch (target.type) {
-      case GameObjectType.tree:
-        return [PlayerActionType.chop].includes(actionType);
-      case GameObjectType.rock:
-        return [PlayerActionType.mine].includes(actionType);
-      case GameObjectType.player:
-        return [PlayerActionType.giveItem].includes(actionType);
-      default:
-        throw new Error ('Unhandled game object type: "' + actionType + '".');
-    }
+    return player.availableActions.some((a) => a.actionType === actionType && a.targetType === target.type);
   }
 
   private startAction(player: Player, target: GameObject, actionType: PlayerActionType): void {
-    player.action = {
-      targetGameObjectId: target.id,
-      timeRemainingInMilliseconds: 3000,
-      type: actionType,
-    };
-    const startActionMessage = this.actionStartedComposer.compose(player.id, player.action);
-    this.gameManager.sendMessageToAllPlayers(startActionMessage);
+    const timeToPerformAction = this.calculateTimeToPerformAction(player, target, actionType);
+    if (timeToPerformAction > 0) {
+      const action: PlayerAction = {
+        targetGameObjectId: target.id,
+        timeRemainingInMilliseconds: timeToPerformAction,
+        type: actionType,
+      };
+      player.action = action;
+      const startActionMessage = this.actionStartedComposer.compose(player.id, player.action);
+      this.gameManager.sendMessageToAllPlayers(startActionMessage);
+    } else {
+      this.gameManager.resolveAction(player, target, actionType);
+    }
+  }
+
+  private calculateTimeToPerformAction(player: Player, target: GameObject, actionType: PlayerActionType): number {
+    switch(actionType) {
+      case PlayerActionType.chop: return 3000;
+      case PlayerActionType.mine: return 5000;
+      case PlayerActionType.fish: return 10000;
+      case PlayerActionType.turnInResources: return 0;
+      case PlayerActionType.buy: return 0;
+      case PlayerActionType.dropItem: return 0;
+      case PlayerActionType.giveItem: return 0;
+      case PlayerActionType.takeItem: return 0;
+      default: throw new Error('No time set for performing action type: "' + actionType + '".');
+    }
   }
 }

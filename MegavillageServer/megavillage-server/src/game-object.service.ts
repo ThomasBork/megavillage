@@ -30,7 +30,7 @@ export class GameObjectService {
       + this.calculateDistanceOverlappedOnYAxis(objectA, objectB);
   }
 
-  public cloneGameObject(obj: GameObject): GameObject {
+  public clonePhysicalGameObject(obj: GameObject): GameObject {
     return {
       id: obj.id,
       blocksMovement: obj.blocksMovement,
@@ -39,6 +39,8 @@ export class GameObjectService {
       size: this.vectorService.cloneVector(obj.size),
       speed: obj.speed,
       type: obj.type,
+      items: [],
+      maxItemCount: 0
     };
   }
 }

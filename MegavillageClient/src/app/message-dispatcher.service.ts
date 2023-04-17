@@ -23,6 +23,12 @@ import { ItemGainedHandlerService } from './message-handlers/item-gained-handler
 import { ServerMessageItemGained } from 'src/shared/messages/server/server-message-item-gained';
 import { ItemResourceStackQuantityChangedHandlerService } from './message-handlers/item-resource-stack-quantity-changed-handler.service';
 import { ServerMessageItemResourceStackQuantityChanged } from 'src/shared/messages/server/server-message-item-resource-stack-quantity-changed';
+import { PlayerAvailableActionsChangedHandlerService } from './message-handlers/player-available-actions-changed-handler.service';
+import { ServerMessagePlayerAvailableActionsChanged } from 'src/shared/messages/server/server-message-player-available-actions-changed';
+import { GameResourceQuantityChangedHandlerService } from './message-handlers/game-resource-quantity-changed-handler.service';
+import { ItemRemovedHandlerService } from './message-handlers/item-removed-handler.service';
+import { ServerMessageGameResourceQuantityChanged } from 'src/shared/messages/server/server-message-game-resource-quantity-changed';
+import { ServerMessageItemRemoved } from 'src/shared/messages/server/server-message-item-removed';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +46,9 @@ export class MessageDispatcherService {
     private gameObjectRemovedHandlerService: GameObjectRemovedHandlerService,
     private itemGainedHandlerService: ItemGainedHandlerService,
     private itemResourceStackQuantityChangedHandlerService: ItemResourceStackQuantityChangedHandlerService,
+    private playerAvailableActionsChangedHandlerService: PlayerAvailableActionsChangedHandlerService,
+    private itemRemovedHandlerService: ItemRemovedHandlerService,
+    private gameResourceQuantityChangedHandlerService: GameResourceQuantityChangedHandlerService,
   ) { }
 
   public handleMessage<T extends object>(messageContainer: ServerMessageContainer<T>): void {
@@ -86,6 +95,18 @@ export class MessageDispatcherService {
       }
       case ServerMessageType.itemResourceStackQuantityChanged: {
         this.itemResourceStackQuantityChangedHandlerService.handle(messageContainer.message as ServerMessageItemResourceStackQuantityChanged);
+        break;
+      }
+      case ServerMessageType.playerAvailableActionsChanged: {
+        this.playerAvailableActionsChangedHandlerService.handle(messageContainer.message as ServerMessagePlayerAvailableActionsChanged);
+        break;
+      }
+      case ServerMessageType.itemRemoved: {
+        this.itemRemovedHandlerService.handle(messageContainer.message as ServerMessageItemRemoved);
+        break;
+      }
+      case ServerMessageType.gameResourceQuantityChanged: {
+        this.gameResourceQuantityChangedHandlerService.handle(messageContainer.message as ServerMessageGameResourceQuantityChanged);
         break;
       }
       default:

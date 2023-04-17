@@ -2,12 +2,15 @@ import { Game } from 'src/shared/game-state/game';
 import { UIGameObject } from './ui-game-object';
 import { UIGameObjectPlayer } from './ui-game-object-player';
 import { Vector2 } from 'src/shared/game-state/vector2';
+import { GameResource } from 'src/shared/game-state/game-resource';
+import { UIGameObjectShop } from './ui-game-object-shop';
 
 export class UIGame {
   private currentTargetObject?: UIGameObject;
   private gameObjects: UIGameObject[];
   private serverState: Game;
   private currentMovementDirection: Vector2;
+  private selectedShop: UIGameObjectShop | undefined;
 
   public constructor(
     serverState: Game,
@@ -53,6 +56,24 @@ export class UIGame {
 
   public removeGameObjectWithId(gameObjectId: number): void {
     this.gameObjects = this.gameObjects.filter((o) => o.getId() !== gameObjectId);
+    if (this.currentTargetObject && this.currentTargetObject.getId() === gameObjectId) {
+      this.currentTargetObject = undefined;
+    }
+    if (this.selectedShop && this.selectedShop.getId() === gameObjectId) {
+      this.selectedShop = undefined;
+    }
+  }
+
+  public getResources(): GameResource[] {
+    return this.serverState.sharedResources;
+  }
+
+  public setSelectedShop(shop: UIGameObjectShop | undefined): void {
+    this.selectedShop = shop;
+  }
+
+  public getSelectedShop(): UIGameObjectShop | undefined {
+    return this.selectedShop;
   }
 
   private getPlayers(): UIGameObjectPlayer[] {

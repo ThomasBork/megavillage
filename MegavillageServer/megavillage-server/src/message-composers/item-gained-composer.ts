@@ -6,12 +6,13 @@ import { ServerMessageType } from 'src/shared/messages/server/server-message-typ
 
 @Injectable()
 export class ItemGainedComposer {
-  public compose(playerId: number, item: Item): ServerMessageContainer<ServerMessageItemGained> {
+  public compose(gameObjectId: number, item: Item, index: number): ServerMessageContainer<ServerMessageItemGained> {
     return {
       type: ServerMessageType.itemGained,
       message: {
-        playerId: playerId,
+        gameObjectId: gameObjectId,
         item: item,
+        index: index,
       },
     };
   }

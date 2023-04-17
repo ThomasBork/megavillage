@@ -1,0 +1,30 @@
+<div class="container">
+  <ul class="items-for-sale">
+    <li *ngFor="let itemRecipe of shop.getItemsForSale()">
+      <div 
+        [ngClass]="{'affordable': canPurchaseItem(itemRecipe)}" 
+        class="item-recipe-container"
+        (click)="buyItem(itemRecipe)"
+      >
+        <img class="item-recipe-image" [src]="getItemImagePath(itemRecipe)" />
+        <span class="item-recipe-name-and-description">
+          <div class="item-recipe-name">{{itemRecipe.name}}</div>
+          <div>
+            <div *ngFor="let line of getItemDescriptionLines(itemRecipe)">{{line}}</div>
+          </div>
+        </span>
+        <ul class="item-recipe-resources">
+          <li class="item-recipe-resource" *ngFor="let resource of itemRecipe.cost">
+            <img class="item-recipe-resource-image" [src]="getResourceImagePath(resource.resourceType)" />
+            <span>{{resource.quantity}}</span>
+          </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+  <ul class="items">
+    <li *ngFor="let item of shop.getItems()">
+      <app-hud-item (click)="takeItem(item)" [item]="item"></app-hud-item>
+    </li>
+  </ul>
+</div>

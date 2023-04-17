@@ -1,0 +1,22 @@
+.resources {
+  display: flex;
+  background-color: brown;
+  padding: 3px;
+  >:not(:first-child) {
+    margin-left: 5px;
+  } 
+  .resource-container {
+    display: flex;
+    align-items: center;
+    width: 150px;
+    justify-content: space-between;
+    padding: 3px;
+    background-color: orange;
+
+    .image {
+      height: 40px;
+      width: 40px;
+      margin-right: 5px;
+    }
+  }
+}

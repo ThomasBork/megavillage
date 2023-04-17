@@ -1,4 +1,5 @@
 import { GameObjectType } from './game-object-type';
+import { Item } from './item';
 import { Vector2 } from './vector2';
 
 export interface GameObject {
@@ -9,4 +10,6 @@ export interface GameObject {
   direction: Vector2;
   speed: number;
   blocksMovement: boolean;
+  items: (Item | null)[];
+  maxItemCount: number;
 }

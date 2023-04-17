@@ -11,38 +11,65 @@ import { UserService } from './user.service';
 import { PlayerJoinedComposer } from './message-composers/player-joined-composer';
 import { ItemType } from './shared/game-state/item-type';
 import { PlayerActionType } from './shared/game-state/player-action-type';
+import { ActionTypeWithTargetType } from './shared/game-state/action-type-with-target-type';
+import { ListService } from './list.service';
+import { PlayerAvailableActionsChangedComposer } from './message-composers/player-available-actions-changed-composer';
+import { Item } from './shared/game-state/item';
+import { ItemGainedComposer } from './message-composers/item-gained-composer';
+import { GameObjectRemovedComposer } from './message-composers/game-object-removed-composer';
+import { ResourceType } from './shared/game-state/resource-type';
+import { ItemResourceStack } from './shared/game-state/item-resource-stack';
+import { ItemResourceStackQuantityChangedComposer } from './message-composers/item-resource-stack-quantity-changed-composer';
+import { ItemRemovedComposer } from './message-composers/item-removed-composer';
+import { GameResourceQuantityChangedComposer } from './message-composers/game-resource-quantity-changed-composer';
+import { WorldBuilderService } from './world-builder.service';
+import { ItemRecipe } from './shared/game-state/item-recipe';
+import { Shop } from './shared/game-state/shop';
+import { GameResource } from './shared/game-state/game-resource';
 
 @Injectable()
 export class GameManager {
   public game: Game;
 
-  private mapWidth = 10000;
-  private mapHeight = 10000;
-  private mapMinX = -this.mapWidth / 2;
-  private mapMaxX = this.mapWidth / 2;
-  private mapMinY = -this.mapHeight / 2;
-  private mapMaxY = this.mapHeight / 2;
-  private rockWidth = 50;
-  private rockHeight = 50;
-  private treeWidth = 80;
-  private treeHeight = 100;
-  private shopWidth = 600;
-  private shopHeight = 200;
-  private builderNextGameObjectId: number;
-
   public constructor(
     private connectionManager: ConnectionManager,
     private vectorService: VectorService,
     private userService: UserService,
+    private listService: ListService,
     private playerJoinedComposer: PlayerJoinedComposer,
+    private playerAvailableActionsChangedComposer: PlayerAvailableActionsChangedComposer,
+    private itemGainedComposer: ItemGainedComposer,
+    private gameObjectRemovedComposer: GameObjectRemovedComposer,
+    private itemResourceStackQuantityChangedComposer: ItemResourceStackQuantityChangedComposer,
+    private itemRemovedComposer: ItemRemovedComposer,
+    private gameResourceQuantityChangedComposer: GameResourceQuantityChangedComposer,
+    private worldBuilderService: WorldBuilderService,
   ) {
-    this.builderNextGameObjectId = 0;
-    const gameObjects = this.buildWorld();
+    const gameObjects = this.worldBuilderService.buildWorld();
     this.game = {
-      nextGameObjectId: this.builderNextGameObjectId,
+      nextGameObjectId: this.worldBuilderService.builderNextGameObjectId,
       nextItemId: 1,
       gameObjects: gameObjects,
-      sharedResources: [],
+      sharedResources: [{
+        resourceType: ResourceType.wood,
+        quantity: 0,
+      }],
+      basicActionsForPlayers: [{
+        actionType: PlayerActionType.buy,
+        targetType: GameObjectType.shop,
+      }, {
+        actionType: PlayerActionType.giveItem,
+        targetType: GameObjectType.shop,
+      }, {
+        actionType: PlayerActionType.takeItem,
+        targetType: GameObjectType.shop,
+      }, {
+        actionType: PlayerActionType.turnInResources,
+        targetType: GameObjectType.shop,
+      }, {
+        actionType: PlayerActionType.giveItem,
+        targetType: GameObjectType.player,
+      }],
     };
   }
 
@@ -87,10 +114,6 @@ export class GameManager {
       .filter(g => g.type === GameObjectType.player) as Player[];
   }
 
-  public removeObject(gameObjectId: number): void {
-    this.getGame().gameObjects = this.getGame().gameObjects.filter((o) => o.id !== gameObjectId);
-  }
-
   public addPlayerForUser(userId: number): void {
     const existingPlayer = this.getPlayerByUserId(userId);
     if (existingPlayer) {
@@ -111,12 +134,20 @@ export class GameManager {
       action: null,
       items: [{
         id: this.game.nextItemId++,
-        name: 'Starting Axe',
+        name: 'Axe',
         type: ItemType.axe,
-        actionsEnabledByItem: [PlayerActionType.chop],
+        actionsEnabledByItem: [{actionType: PlayerActionType.chop, targetType: GameObjectType.tree}],
       }],
-      maxItemCount: 4,
+      maxItemCount: 8,
+      availableActions: []
     };
+    player.items.length = player.maxItemCount;
+    for (let i = 0; i<player.maxItemCount; i++) {
+      if (player.items[i] === undefined) {
+        player.items[i] = null;
+      }
+    }
+    player.availableActions = this.getAvailableActionsForPlayer(player);
     this.game.gameObjects.push(player);
 
     const connectionsOfOtherUsers = this
@@ -128,73 +159,216 @@ export class GameManager {
     }
   }
 
-  private buildWorld(): GameObject[] {
-    const objects: GameObject[] = [];
-    for (let x = this.mapMinX; x <= this.mapMaxX - this.rockWidth; x += this.rockWidth) {
-      objects.push(this.buildRock(this.builderNextGameObjectId++, x, this.mapMinY));
-      objects.push(this.buildRock(this.builderNextGameObjectId++, x, this.mapMaxY - this.rockHeight));
+  public resolveAction(player: Player, target: GameObject, actionType: PlayerActionType) {
+    switch (actionType) {
+      case PlayerActionType.chop: {
+        this.removeGameObject(target)
+        const woodToGive = 15 + Math.floor(Math.random() * 8);
+        this.giveResourcesToPlayer(player, ResourceType.wood, woodToGive);
+        break;
+      }
+      case PlayerActionType.mine: {
+        this.removeGameObject(target);
+        const stoneToGive = 10 + Math.floor(Math.random() * 5);
+        this.giveResourcesToPlayer(player, ResourceType.stone, stoneToGive);
+        break;
+      }
+      case PlayerActionType.turnInResources: {
+        for (const item of this.getActualItems(player)) {
+          if (item.type === ItemType.resourceStack) {
+            const itemResourceStack = item as ItemResourceStack;
+            this.giveResourcesToGame(itemResourceStack.resourceType, itemResourceStack.quantity);
+            this.removeItemFromGameObject(player, itemResourceStack);
+          }
+        }
+        break;
+      }
+      default: throw new Error('No logic for handling player action: "' + actionType + '".');
     }
-    for (let y = this.mapMinY + this.rockHeight; y <= this.mapMaxY - 2 * this.rockHeight; y += this.rockHeight) {
-      objects.push(this.buildRock(this.builderNextGameObjectId++, this.mapMinX, y));
-      objects.push(this.buildRock(this.builderNextGameObjectId++, this.mapMaxX - this.rockWidth, y));
+  }
+
+  public tryPayCosts(costs: GameResource[]): boolean {
+    const canPay = costs.every((r) => {
+      const gameResource = this.findOrCreateResource(r.resourceType);
+      return gameResource.quantity >= r.quantity;
+    });
+    if (canPay) {
+      for (const cost of costs) {
+        this.removeResourcesFromGame(cost.resourceType, cost.quantity);
+      }
     }
-    objects.push(
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 2),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 4),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 7),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 8),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -2, this.rockHeight * 9),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -3, this.rockHeight * 9),
-      this.buildRock(this.builderNextGameObjectId++, this.rockWidth * -4, this.rockHeight * 9),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 4, this.treeHeight * 2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 2, this.treeHeight * 6),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 6, this.treeHeight * 6),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * 10, this.treeHeight * 10),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -8, this.treeHeight * -2),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -3),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -4),
-      this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -5),
-      this.buildShop(this.builderNextGameObjectId++, 0, -400),
-    );
-    return objects;
+    return canPay;
   }
 
-  private buildShop(id: number, x: number, y: number): GameObject {
-    return {
-      blocksMovement: true,
-      id: id,
-      position: { x: x, y: y },
-      size: { x: this.shopWidth, y: this.shopHeight },
-      type: GameObjectType.shop,
-      direction: { x: 0, y: 0 },
-      speed: 0,
-    };
+  public moveItem(giver: GameObject, receiver: GameObject, item: Item): void {
+    this.removeItemFromGameObject(giver, item);
+    this.giveItemToGameObject(receiver, item);
   }
 
-  private buildRock(id: number, x: number, y: number): GameObject {
-    return {
-      blocksMovement: true,
-      id: id,
-      position: { x: x, y: y },
-      size: { x: this.rockWidth, y: this.rockHeight },
-      type: GameObjectType.rock,
-      direction: { x: 0, y: 0 },
-      speed: 0,
+  public buildItemAndGiveToShop(itemRecipe: ItemRecipe, shop: Shop): void {
+    const item: Item = {
+      id: this.game.nextGameObjectId++,
+      actionsEnabledByItem: [...itemRecipe.actionsEnabledByItem],
+      name: itemRecipe.name,
+      type: itemRecipe.type,
     };
+    this.giveItemToGameObject(shop, item);
   }
 
-  private buildTree(id: number, x: number, y: number): GameObject {
-    return {
-      blocksMovement: true,
-      id: id,
-      position: { x: x, y: y },
-      size: { x: this.treeWidth, y: this.treeHeight },
-      type: GameObjectType.tree,
-      direction: { x: 0, y: 0 },
-      speed: 0,
+  public getNumberOfEmptyItemSpaces(object: GameObject): number {
+    return object.maxItemCount - this.getActualItems(object).length;
+  }
+
+  public getActualItems(object: GameObject): Item[] {
+    return object.items.filter((i) => i !== null);
+  }
+
+  private removeResourcesFromGame(resourceType: ResourceType, quantity: number): void {
+    const gameResource = this.findOrCreateResource(resourceType);
+    const newQuantity = gameResource.quantity - quantity;
+    this.changeResourceQuantity(gameResource, newQuantity);
+  }
+
+  private giveResourcesToGame(resourceType: ResourceType, quantity: number): void {
+    const gameResource = this.findOrCreateResource(resourceType);
+    const newQuantity = gameResource.quantity + quantity;
+    this.changeResourceQuantity(gameResource, newQuantity);
+  }
+
+  private changeResourceQuantity(gameResource: GameResource, newQuantity: number): void {
+    const oldQuantity = gameResource.quantity;
+    gameResource.quantity = newQuantity;
+    const message = this.gameResourceQuantityChangedComposer.compose(oldQuantity, newQuantity, gameResource.resourceType);
+    this.queueMessageToAllPlayers(message);
+  }
+
+  private findOrCreateResource(resourceType: ResourceType): GameResource {
+    let gameResource = this.game.sharedResources.find((r) => r.resourceType === resourceType);
+    if (!gameResource) {
+      gameResource = {
+        quantity: 0,
+        resourceType: resourceType,
+      };
+      this.game.sharedResources.push(gameResource);
+    }
+    return gameResource;
+  }
+  
+  private giveResourcesToPlayer(player:Player, resourceType: ResourceType, quantity: number): void {
+    let quantityLeftToGive = quantity;
+    for (const item of this.getActualItems(player)) {
+      if (item.type === ItemType.resourceStack) {
+        const resourceStack = item as ItemResourceStack;
+        if (resourceStack.resourceType === resourceType) {
+          const spaceInStack = resourceStack.maxQuantity - resourceStack.quantity;
+          if (spaceInStack > 0) {
+            const quantityToAddToStack = Math.min(spaceInStack, quantityLeftToGive);
+            const oldQuantity = resourceStack.quantity;
+            resourceStack.quantity += quantityToAddToStack;
+            quantityLeftToGive -= quantityToAddToStack;
+
+            const stackQuantityChangedMessage = this.itemResourceStackQuantityChangedComposer.compose(
+              player.id, 
+              resourceStack.id,
+              oldQuantity,
+              resourceStack.quantity);
+            this.queueMessageToAllPlayers(stackQuantityChangedMessage);
+
+            if (quantityLeftToGive === 0) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    const maxQuantity = this.getResourceStackMaxQuantity(resourceType);
+    while (
+      quantityLeftToGive > 0 
+      && this.getActualItems(player).length < player.maxItemCount
+    ) {
+      const quantityToAddToStack = Math.min(maxQuantity, quantityLeftToGive);
+      quantityLeftToGive -= quantityToAddToStack;
+      const itemResourceStack: ItemResourceStack = {
+        id: this.getGame().nextItemId++,
+        actionsEnabledByItem: [],
+        maxQuantity: maxQuantity,
+        name: 'Stack of ' + resourceType,
+        quantity: quantityToAddToStack,
+        resourceType: resourceType,
+        type: ItemType.resourceStack,
+      };
+      this.giveItemToGameObject(player, itemResourceStack);
+    }
+  }
+
+  private getResourceStackMaxQuantity(resourceType: ResourceType): number {
+    switch(resourceType) {
+      case ResourceType.wood: return 30;
+      case ResourceType.stone: return 20;
+      default: throw new Error('No resource stack max quantity for: "' + resourceType + '".');
+    }
+  }
+
+  public removeGameObject(gameObject: GameObject): void {
+    this.getGame().gameObjects = this.getGame().gameObjects.filter((o) => o !== gameObject);
+    const objectRemovedMessage = this.gameObjectRemovedComposer.compose(gameObject.id);
+    this.queueMessageToAllPlayers(objectRemovedMessage);
+  }
+
+  public giveItemToGameObject(gameObject: GameObject, item: Item): void {
+    const emptyIndex = this.listService.findFirstEmptyIndex(gameObject.items, gameObject.maxItemCount);
+    if (emptyIndex < 0) {
+      throw new Error('Game object has no space for another item. Game object id: "' + gameObject.id + '".');
+    }
+    gameObject.items[emptyIndex] = item;
+    const itemGainedMessage = this.itemGainedComposer.compose(gameObject.id, item, emptyIndex);
+    this.queueMessageToAllPlayers(itemGainedMessage);
+    if (gameObject.type === GameObjectType.player) {
+      this.updateAvailableActionsForPlayer(gameObject as Player);
+    }
+  }
+
+  private removeItemFromGameObject(gameObject: GameObject, item: Item): void {
+    const index = gameObject.items.indexOf(item);
+    if (index < 0) {
+      throw new Error ('Item not found on game object. Id: "' + item.id + '".');
+    }
+    gameObject.items[index] = null;
+    const message = this.itemRemovedComposer.compose(gameObject.id, item.id);
+    this.queueMessageToAllPlayers(message);
+    if (gameObject.type === GameObjectType.player) {
+      this.updateAvailableActionsForPlayer(gameObject as Player);
+    }
+  }
+
+  public updateAvailableActionsForPlayer(player: Player): void {
+    const newActions = this.getAvailableActionsForPlayer(player);
+    const hasChanged = !this.listService.areListsIdentical(newActions, player.availableActions);
+    if (hasChanged) {
+      player.availableActions = newActions;
+      const message = this.playerAvailableActionsChangedComposer.compose(player.id, newActions);
+      this.queueMessageToAllPlayers(message);
+    }
+  }
+
+  private getAvailableActionsForPlayer(player: Player): ActionTypeWithTargetType[] {
+    const game = this.getGame();
+    const availableActions: ActionTypeWithTargetType[] = [];
+    const addAction = (actionToAdd: ActionTypeWithTargetType) => {
+      if (availableActions.some((a) => a.actionType === actionToAdd.actionType && a.targetType === actionToAdd.targetType)) {
+        return;
+      }
+      availableActions.push(actionToAdd);
     };
+    for (const gameAction of game.basicActionsForPlayers) {
+      addAction(gameAction);
+    }
+    for (const item of this.getActualItems(player)) {
+      for (const itemAction of item.actionsEnabledByItem) {
+        addAction(itemAction);
+      }
+    }
+    return availableActions;
   }
 }

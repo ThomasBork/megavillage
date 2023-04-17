@@ -13,6 +13,12 @@ import { ConnectionManager } from './connection-manager';
 import { ConnectionClosedComposer } from './message-composers/connection-closed-composer';
 import { PerformActionHandler } from './message-handlers/perform-action-handler';
 import { ClientMessagePerformAction } from './shared/messages/client/client-message-perform-action';
+import { BuyItemHandler } from './message-handlers/buy-item-handler';
+import { ClientMessageBuyItem } from './shared/messages/client/client-message-buy-item';
+import { TakeItemHandler } from './message-handlers/take-item-handler';
+import { GiveItemHandler } from './message-handlers/give-item-handler';
+import { ClientMessageTakeItem } from './shared/messages/client/client-message-take-item';
+import { ClientMessageGiveItem } from './shared/messages/client/client-message-give-item';
 
 @Injectable()
 export class MessageDispatcher {
@@ -26,6 +32,9 @@ export class MessageDispatcher {
     private gameManager: GameManager,
     private connectionManager: ConnectionManager,
     private performActionHandler: PerformActionHandler,
+    private buyItemHandler: BuyItemHandler,
+    private takeItemHandler: TakeItemHandler,
+    private giveItemHandler: GiveItemHandler,
   ) {
     this.logger = new Logger('MessageDispatcher');
   }
@@ -78,6 +87,27 @@ export class MessageDispatcher {
         this.performActionHandler.handle(
           sender,
           messageContainer.message as ClientMessagePerformAction,
+        );
+        break;
+      }
+      case ClientMessageType.buyItem: {
+        this.buyItemHandler.handle(
+          sender,
+          messageContainer.message as ClientMessageBuyItem,
+        );
+        break;
+      }
+      case ClientMessageType.takeItem: {
+        this.takeItemHandler.handle(
+          sender,
+          messageContainer.message as ClientMessageTakeItem,
+        );
+        break;
+      }
+      case ClientMessageType.giveItem: {
+        this.giveItemHandler.handle(
+          sender,
+          messageContainer.message as ClientMessageGiveItem,
         );
         break;
       }

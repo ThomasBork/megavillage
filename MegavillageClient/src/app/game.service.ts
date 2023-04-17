@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import { Game } from 'src/shared/game-state/game';
 import { UIGame } from './ui-game-state/ui-game';
-import { UIGameStateBuilderService } from './ui-game-state/ui-game-state-builder.service';
 import { UIGameObject } from './ui-game-state/ui-game-object';
 import { Vector2 } from 'src/shared/game-state/vector2';
 import { GameObjectService } from './game-object.service';
 import { VectorService } from './vector.service';
+import { UIGameObjectPlayer } from './ui-game-state/ui-game-object-player';
+import { Subject } from 'rxjs';
+import { UIGameStateBuilderService } from './ui-game-state/ui-game-state-builder.service';
+import { Game } from 'src/shared/game-state/game';
+import { PlayerActionType } from 'src/shared/game-state/player-action-type';
+import { GameResource } from 'src/shared/game-state/game-resource';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +17,15 @@ import { VectorService } from './vector.service';
 export class GameService {
   private game?: UIGame;
   public onGameStateReceived: Subject<UIGame>;
+  
   public constructor(
-    private uiGameStateBuilderService: UIGameStateBuilderService,
     private gameObjectService: GameObjectService,
     private vectorService: VectorService,
+    private uiGameStateBuilderService: UIGameStateBuilderService,
   ) { 
     this.onGameStateReceived = new Subject<UIGame>();
   }
-
+  
   public setGame(serverState: Game): void {
     this.game = this.uiGameStateBuilderService.build(serverState);
     this.onGameStateReceived.next(this.game);
@@ -41,6 +45,25 @@ export class GameService {
     }
     return gameObject;
   }
+
+  public getPlayer(id: number): UIGameObjectPlayer {
+    const gameObject = this.getGameObject(id);
+    if (gameObject instanceof UIGameObjectPlayer) {
+      return gameObject;
+    }
+    throw new Error('Game object was not a player. Id: "' + id + '".');
+  }
+
+  public getCurrentPlayer(): UIGameObjectPlayer {
+    return this.getGame().getCurrentPlayer();
+  }
+
+  public hasResources(resources: GameResource[]): boolean {
+    return resources.every((resource) => {
+      const gameResource = this.getGame().getResources().find((r) => r.resourceType === resource.resourceType);
+      return gameResource && gameResource.quantity >= resource.quantity;
+    });
+  }
   
   public updateCurrentTargetObject(): void {
     const game = this.getGame();
@@ -52,10 +75,8 @@ export class GameService {
     const targetAreaSize = this.vectorService.multiplyVector(currentPlayer.getSize(), 2);
     const possibleTargets = game.getGameObjects()
       .filter((o) => o !== currentPlayer)
+      .filter((o) => this.getAvailableActionTypesOnTarget(currentPlayer, o).length > 0)
       .filter((o) => this.gameObjectService.doesAreaOverlapWithGameObject(o, targetPoint, targetAreaSize));
-    console.log('Movement direction', game.getMovementDirection());
-    console.log('Player point', currentPlayer.getPosition(), 'Target point', targetPoint);
-    console.log('Possible targets', possibleTargets.map((o) => o.getId()));
     let target: UIGameObject | undefined = undefined;
     let leastDistanceFromTargetPoint: number = Infinity;
     for (const possibleTarget of possibleTargets) {
@@ -64,8 +85,13 @@ export class GameService {
         target = possibleTarget;
         leastDistanceFromTargetPoint = distanceFromTargetPoint;
       }
-      console.log('Possible target', possibleTarget.getId(), distanceFromTargetPoint, possibleTarget.getPosition());
     }
     game.setCurrentTargetObject(target);
+  }
+  
+  private getAvailableActionTypesOnTarget(performingPlayer: UIGameObjectPlayer, targetGameObject: UIGameObject): PlayerActionType[] {
+    return performingPlayer.getAvailableActions()
+      .filter((a) => a.targetType === targetGameObject.getType())
+      .map((a) => a.actionType);
   }
 }

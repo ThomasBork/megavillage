@@ -1,5 +1,6 @@
 import { GameObject } from 'src/shared/game-state/game-object';
 import { GameObjectType } from 'src/shared/game-state/game-object-type';
+import { Item } from 'src/shared/game-state/item';
 import { Vector2 } from 'src/shared/game-state/vector2';
 
 export class UIGameObject {
@@ -33,5 +34,32 @@ export class UIGameObject {
   }
   public getMaxY(): number {
     return this.getPosition().y + this.getSize().y / 2;
+  }
+  public getItems(): (Item | null)[] {
+    return this.serverState.items;
+  }
+  public getItem(itemId: number): Item {
+    const item = this.getItems().find((i) => i !== null && i.id === itemId);
+    if (!item) {
+      throw new Error ('Could not find item with id: "' + itemId + '".');
+    }
+    return item;
+  }
+  public getItemAtIndex(index: number): Item | null {
+    return this.serverState.items[index];
+  }
+  public setItem(item: Item, index: number): void {
+    this.serverState.items[index] = item;
+  }
+  public removeItem(item: Item): void {
+    const items = this.serverState.items;
+    const index = items.indexOf(item);
+    if (index < 0) {
+      throw new Error('Item with id = "' + item.id + '" was not found on game object with id = "' + this.getId() + '".');
+    }
+    items[index] = null;
+  }
+  public getMaxItemCount(): number {
+    return this.serverState.maxItemCount;
   }
 }

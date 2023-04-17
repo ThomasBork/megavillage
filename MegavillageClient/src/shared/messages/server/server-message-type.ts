@@ -12,4 +12,5 @@ export enum ServerMessageType {
   itemResourceStackQuantityChanged = 'itemResourceStackQuantityChanged',
   itemRemoved = 'itemRemoved',
   gameResourceQuantityChanged = 'gameResourceQuantityChanged',
+  playerAvailableActionsChanged = 'playerAvailableActionsChanged',
 }

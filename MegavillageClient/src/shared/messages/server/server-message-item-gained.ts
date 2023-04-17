@@ -1,6 +1,7 @@
 import { Item } from '../../game-state/item';
 
 export interface ServerMessageItemGained {
-  playerId: number;
+  gameObjectId: number;
   item: Item;
+  index: number;
 }

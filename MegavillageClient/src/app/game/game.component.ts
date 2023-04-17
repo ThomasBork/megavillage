@@ -6,7 +6,7 @@ import { UIGame } from '../ui-game-state/ui-game';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss']
 })
-export class GameComponent implements OnInit {
+export class GameComponent {
   @Input()
   public game!: UIGame;
 
@@ -19,10 +19,6 @@ export class GameComponent implements OnInit {
     const player = this.game.getCurrentPlayer();
     return player.getPosition().y;
   };
-  
-  public ngOnInit(): void {
-    
-  }
 
   public getTransform(): string {
     return `scale(${this.zoom}) translate(calc(50% - ${this.playerCenterX}px), calc(50% - ${this.playerCenterY}px))`;

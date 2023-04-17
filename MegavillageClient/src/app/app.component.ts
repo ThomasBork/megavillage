@@ -7,6 +7,7 @@ import { CreateUserResult } from 'src/shared/user/create-user-result';
 import { LogInResult } from 'src/shared/user/log-in-result';
 import { UIGame } from './ui-game-state/ui-game';
 import { ActionService } from './action.service';
+import { MessageDispatcherService } from './message-dispatcher.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private keyboardService: KeyboardService,
     private setDirectionComposerService: SetDirectionComposerService,
     private actionService: ActionService,
+    private messageDispatcherService: MessageDispatcherService,
   ) {
     this.screen = 'LogIn';
     this.authenticationToken = null;
@@ -45,7 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (!this.authenticationToken) {
       throw new Error('Unable to connect without an authentication token.');
     }
-    this.connectionService.connect(this.authenticationToken);
+    this.connectionService.connect(this.authenticationToken, (message) => this.messageDispatcherService.handleMessage(message));
   }
 
   public handleKeyDown(keyEvent: KeyboardEvent): void {
@@ -62,12 +64,16 @@ export class AppComponent implements OnInit, OnDestroy {
         const previousNonZeroMovementDirection = this.keyboardService.getPreviousNonZeroMovementDirection();
         this.game.setMovementDirection(previousNonZeroMovementDirection);
         this.gameService.updateCurrentTargetObject();
+        this.game.setSelectedShop(undefined);
       } else if (keyEvent.key === 'e') {
         const target = this.game.getCurrentTargetObject();
         console.log('Target: ' + target?.getId() + ', ' + target);
         if (target) {
-          this.actionService.handleGenericActionOnObject(target);
+          const currentPlayer = this.gameService.getCurrentPlayer();
+          this.actionService.handleGenericActionOnObject(currentPlayer, target);
         }
+      } else if (keyEvent.key === 'Escape') {
+        this.game.setSelectedShop(undefined);
       }
     }
   }

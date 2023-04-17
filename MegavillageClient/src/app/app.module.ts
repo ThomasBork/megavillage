@@ -8,10 +8,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CreateUserComponent } from './user/create-user/create-user.component';
 import { LogInComponent } from './user/log-in/log-in.component';
-import { HudItemsComponent } from './game/hud-items/hud-items.component';
-import { HudItemComponent } from './game/hud-items/hud-item/hud-item.component';
+import { HudItemsComponent } from './game/hud/hud-items/hud-items.component';
+import { HudItemComponent } from './game/hud/hud-items/hud-item/hud-item.component';
 import { AnimationComponent } from './common/animation/animation.component';
 import { PlayerComponent } from './game/game-object/player/player.component';
+import { HudResourcesComponent } from './game/hud/hud-resources/hud-resources.component';
+import { HudShopWindowComponent } from './game/hud/hud-shop-window/hud-shop-window.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { PlayerComponent } from './game/game-object/player/player.component';
     HudItemsComponent,
     HudItemComponent,
     AnimationComponent,
-    PlayerComponent
+    PlayerComponent,
+    HudResourcesComponent,
+    HudShopWindowComponent
   ],
   imports: [
     BrowserModule,

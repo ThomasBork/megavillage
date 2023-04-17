@@ -11,11 +11,7 @@ export class ItemGainedHandlerService {
   public constructor(private gameService: GameService) { }
 
   public handle(message: ServerMessageItemGained): void {
-    const gameObject = this.gameService.getGameObject(message.playerId);
-    if (gameObject instanceof UIGameObjectPlayer) {
-      gameObject.addItem(message.item);
-    } else {
-      throw new Error('Non-player game object found gaining an item. Id: "' + gameObject.getId() + '".');
-    }
+    const gameObject = this.gameService.getGameObject(message.gameObjectId);
+    gameObject.setItem(message.item, message.index);
   }
 }

@@ -7,6 +7,8 @@ import { GameObjectType } from 'src/shared/game-state/game-object-type';
 import { UIGameObjectPlayer } from './ui-game-object-player';
 import { Player } from 'src/shared/game-state/player';
 import { UserService } from '../user.service';
+import { Shop } from 'src/shared/game-state/shop';
+import { UIGameObjectShop } from './ui-game-object-shop';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +26,9 @@ export class UIGameStateBuilderService {
     if (serverState.type === GameObjectType.player) {
       const playerServerState = serverState as Player;
       return new UIGameObjectPlayer(playerServerState, this.userService.getUser().id === playerServerState.userId);
+    } else if (serverState.type === GameObjectType.shop) {
+      const shopServerState = serverState as Shop;
+      return new UIGameObjectShop(shopServerState);
     }
     return new UIGameObject(serverState);
   }

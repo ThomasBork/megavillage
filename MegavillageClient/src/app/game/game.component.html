@@ -9,6 +9,15 @@
     ></app-game-object>
   </div>
 
+  <div 
+    *ngIf="game.getSelectedShop()"
+    class="shop-window-container"
+  >
+    <app-hud-shop-window [shop]="game.getSelectedShop()!"></app-hud-shop-window>
+  </div>
+  <div class="resources-container">
+    <app-hud-resources [resources]="game.getResources()"></app-hud-resources>
+  </div>
   <div class="items-container">
     <app-hud-items [player]="game.getCurrentPlayer()"></app-hud-items>
   </div>

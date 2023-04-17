@@ -25,6 +25,14 @@ import { GameObjectRemovedComposer } from './message-composers/game-object-remov
 import { ActionCanceledComposer } from './message-composers/action-canceled-composer';
 import { ItemResourceStackQuantityChangedComposer } from './message-composers/item-resource-stack-quantity-changed-composer';
 import { ItemGainedComposer } from './message-composers/item-gained-composer';
+import { ListService } from './list.service';
+import { PlayerAvailableActionsChangedComposer } from './message-composers/player-available-actions-changed-composer';
+import { GameResourceQuantityChangedComposer } from './message-composers/game-resource-quantity-changed-composer';
+import { ItemRemovedComposer } from './message-composers/item-removed-composer';
+import { WorldBuilderService } from './world-builder.service';
+import { BuyItemHandler } from './message-handlers/buy-item-handler';
+import { TakeItemHandler } from './message-handlers/take-item-handler';
+import { GiveItemHandler } from './message-handlers/give-item-handler';
 
 @Module({
   imports: [],
@@ -42,6 +50,9 @@ import { ItemGainedComposer } from './message-composers/item-gained-composer';
     UserService,
     SetDirectionHandler,
     PerformActionHandler,
+    BuyItemHandler,
+    TakeItemHandler,
+    GiveItemHandler,
     AuthenticationResultComposer,
     ConnectionClosedComposer,
     CompleteGameStateComposer,
@@ -53,7 +64,12 @@ import { ItemGainedComposer } from './message-composers/item-gained-composer';
     GameObjectRemovedComposer,
     ItemGainedComposer,
     ItemResourceStackQuantityChangedComposer,
+    PlayerAvailableActionsChangedComposer,
+    ItemRemovedComposer,
+    GameResourceQuantityChangedComposer,
     UserPersistenceService,
+    ListService,
+    WorldBuilderService,
   ],
 })
 export class AppModule {}

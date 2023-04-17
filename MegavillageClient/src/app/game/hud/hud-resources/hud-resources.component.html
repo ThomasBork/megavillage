@@ -1,0 +1,8 @@
+<ul class="resources">
+  <li *ngFor="let resource of resources">
+    <span class="resource-container">
+      <img class="image" [src]="getResourceImagePath(resource)" />
+      <span class="quantity">{{resource.quantity}}</span>
+    </span>
+  </li>
+</ul>

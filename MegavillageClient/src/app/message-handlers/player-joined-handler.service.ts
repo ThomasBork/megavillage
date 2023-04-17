@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ServerMessagePlayerJoined } from 'src/shared/messages/server/server-message-player-joined';
-import { GameService } from '../game.service';
 import { UIGameStateBuilderService } from '../ui-game-state/ui-game-state-builder.service';
+import { GameService } from '../game.service';
 
 @Injectable({
   providedIn: 'root'

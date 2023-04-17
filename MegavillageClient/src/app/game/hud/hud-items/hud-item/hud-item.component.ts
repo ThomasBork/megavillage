@@ -10,10 +10,10 @@ import { ItemType } from 'src/shared/game-state/item-type';
 })
 export class HudItemComponent {
   @Input()
-  public item!: Item;
+  public item!: Item | null;
 
   public isResourceStack(): boolean {
-    return this.item.type === ItemType.resourceStack;
+    return this.item !== null && this.item.type === ItemType.resourceStack;
   }
 
   public getResourceQuantity(): number {
@@ -21,6 +21,9 @@ export class HudItemComponent {
   }
 
   public getImagePath(): string {
+    if (this.item === null) {
+      throw new Error ('Tried to get image path of an empty item slot.');
+    }
     if (this.isResourceStack()) {
       return 'assets/images/items/' + (this.item as ItemResourceStack).resourceType.toString() + '.png';
     }

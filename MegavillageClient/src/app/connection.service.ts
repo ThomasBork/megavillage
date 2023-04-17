@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ClientMessageContainer } from 'src/shared/messages/client/client-message-container';
-import { MessageDispatcherService } from './message-dispatcher.service';
 import { AuthenticateComposerService } from './message-composers/authenticate-composer.service';
+import { ServerMessageContainer } from 'src/shared/messages/server/server-message-container';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +10,10 @@ export class ConnectionService {
   private ws?: WebSocket
 
   public constructor(
-    private messageDispatcherService: MessageDispatcherService,
     private authenticateComposerService: AuthenticateComposerService,
   ) { }
 
-  public connect(authenticationToken: string) {
+  public connect<T extends object>(authenticationToken: string, onMessage: (message: ServerMessageContainer<T>)=>void) {
     this.ws = new WebSocket('ws://localhost:3000');
 
     this.ws.onclose = (event: CloseEvent) => {
@@ -35,7 +34,7 @@ export class ConnectionService {
     this.ws.onmessage = (event: MessageEvent<string>) => {
       const message = JSON.parse(event.data.toString());
       console.log('Message received:', message);
-      this.messageDispatcherService.handleMessage(message);
+      onMessage(message);
     };
   }
 

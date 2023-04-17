@@ -1,0 +1,71 @@
+.container {
+  transform: translate(-50%, 50%);
+  display: flex;
+  
+  .items-for-sale {
+    width: 300px;
+    background-color: green;
+    padding: 10px;
+
+    .item-recipe-container {
+      display: flex;
+      padding: 5px;
+      background-color: yellowgreen;
+      margin-bottom: 10px;
+
+      &.affordable {
+        cursor: pointer;
+  
+        &:active:hover {
+          transform: translate(2px, 2px);
+        }
+      }
+
+      &:not(.affordable) {
+        opacity: 50%;
+      }
+
+      .item-recipe-image {
+        height: 50px;
+        width: 50px;
+        margin-right: 5px;
+      }
+
+      .item-recipe-name-and-description {
+        flex: 1 1 0;
+
+        .item-recipe-name {
+          font-size: 20px;
+          font-weight: bold;
+        }
+      }
+      .item-recipe-resources {
+        margin-left: 5px;
+
+        .item-recipe-resource {
+          display: flex;
+          align-items: center;
+  
+          .item-recipe-resource-image {
+            height: 30px;
+            width: 30px;
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  .items {
+    width: 300px;
+    background-color: brown;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 5px;
+
+    &>li {
+      padding: 5px;
+    }
+  }
+}

@@ -6,4 +6,6 @@ export enum PlayerActionType {
 	dropItem = 'dropItem',
 	giveItem = 'giveItem',
 	takeItem = 'takeItem',
+	buyItem = 'buyItem',
+	turnInResources = 'turnInResources',
 }
