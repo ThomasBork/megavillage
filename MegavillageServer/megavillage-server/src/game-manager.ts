@@ -66,9 +66,6 @@ export class GameManager {
       }, {
         actionType: PlayerActionType.turnInResources,
         targetType: GameObjectType.shop,
-      }, {
-        actionType: PlayerActionType.giveItem,
-        targetType: GameObjectType.player,
       }],
     };
   }

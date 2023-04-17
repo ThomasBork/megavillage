@@ -2,12 +2,18 @@
   class="container" 
   [ngClass]="{'flipped': isFlippedHorizontally()}"
 >
-  <app-animation
-    *ngIf="isPerformingAction()"
-    [animationFolderPath]="getActionAnimationFolderPath()"
-    [imageCount]="getActionAnimationImageCount()"
-    [maxDuration]="getActionAnimationMaxDuration()"
-    [(timePassed)]="currentAnimationTimePassed"
-  ></app-animation>
-  <img *ngIf="!isPerformingAction()" class="image" [src]="getImagePath()" />
+  <div class="name-tag">{{player.getUserName()}}</div>
+  <div
+    class="body-container"
+    [ngClass]="{'flipped': isFlippedHorizontally()}"
+  >
+    <app-animation
+      *ngIf="isPerformingAction()"
+      [animationFolderPath]="getActionAnimationFolderPath()"
+      [imageCount]="getActionAnimationImageCount()"
+      [maxDuration]="getActionAnimationMaxDuration()"
+      [(timePassed)]="currentAnimationTimePassed"
+    ></app-animation>
+    <img *ngIf="!isPerformingAction()" class="image" [src]="getImagePath()" />
+  </div>
 </div>
