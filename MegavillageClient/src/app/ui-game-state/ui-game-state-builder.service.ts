@@ -9,6 +9,8 @@ import { Player } from 'src/shared/game-state/player';
 import { UserService } from '../user.service';
 import { Shop } from 'src/shared/game-state/shop';
 import { UIGameObjectShop } from './ui-game-object-shop';
+import { GameObjectWithStages } from 'src/shared/game-state/game-object-with-stages';
+import { UIGameObjectWithStages } from './ui-game-object-with-stages';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +31,9 @@ export class UIGameStateBuilderService {
     } else if (serverState.type === GameObjectType.shop) {
       const shopServerState = serverState as Shop;
       return new UIGameObjectShop(shopServerState);
+    } else if (serverState.type === GameObjectType.bush) {
+      const serverStateWithStages = serverState as GameObjectWithStages;
+      return new UIGameObjectWithStages(serverStateWithStages);
     }
     return new UIGameObject(serverState);
   }

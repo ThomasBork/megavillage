@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { GameService } from 'src/app/game.service';
 import { UIGameObject } from 'src/app/ui-game-state/ui-game-object';
 import { UIGameObjectPlayer } from 'src/app/ui-game-state/ui-game-object-player';
+import { UIGameObjectWithStages } from 'src/app/ui-game-state/ui-game-object-with-stages';
 import { GameObjectType } from 'src/shared/game-state/game-object-type';
 
 @Component({
@@ -27,6 +28,10 @@ export class GameObjectComponent {
     return this.gameObject instanceof UIGameObjectPlayer;
   }
 
+  public isGameObjectWithStages(): boolean {
+    return this.gameObject instanceof UIGameObjectWithStages;
+  }
+
   public getPlayer(): UIGameObjectPlayer {
     if (this.gameObject instanceof UIGameObjectPlayer) {
       return this.gameObject;
@@ -35,7 +40,19 @@ export class GameObjectComponent {
     }
   }
 
+  public getGameObjectWithStages(): UIGameObjectWithStages {
+    if (this.gameObject instanceof UIGameObjectWithStages) {
+      return this.gameObject;
+    } else {
+      throw new Error('Expected object to have stages, but it is of type: "' + this.gameObject.getType.toString() + '".');
+    }
+  }
+
   public getImagePath(): string {
     return 'assets/images/' + this.gameObject.getType().toString() + '.png';
+  }
+
+  public getZIndex(): number {
+    return this.gameObject.getMinY();
   }
 }

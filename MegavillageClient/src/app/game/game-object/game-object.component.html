@@ -5,9 +5,11 @@
     top: gameObject.getPosition().y - gameObject.getSize().y / 2 + 'px',
     width: gameObject.getSize().x + 'px',
     height: gameObject.getSize().y + 'px',
-    border: getBorder()
+    border: getBorder(),
+    'z-index': true ? getZIndex() : 2
   }"
 >
   <app-player *ngIf="isPlayer()" [player]="getPlayer()"></app-player>
-  <img *ngIf="!isPlayer()" class="image" [src]="getImagePath()" />
+  <app-game-object-with-stages *ngIf="isGameObjectWithStages()" [gameObject]="getGameObjectWithStages()"></app-game-object-with-stages>
+  <img *ngIf="!isPlayer() && !isGameObjectWithStages()" class="image" [src]="getImagePath()" />
 </div>

@@ -29,6 +29,8 @@ import { GameResourceQuantityChangedHandlerService } from './message-handlers/ga
 import { ItemRemovedHandlerService } from './message-handlers/item-removed-handler.service';
 import { ServerMessageGameResourceQuantityChanged } from 'src/shared/messages/server/server-message-game-resource-quantity-changed';
 import { ServerMessageItemRemoved } from 'src/shared/messages/server/server-message-item-removed';
+import { GameObjectStageChangedHandlerService } from './message-handlers/game-object-stage-changed-handler.service';
+import { ServerMessageGameObjectStageChanged } from 'src/shared/messages/server/server-message-game-object-stage-changed';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +51,7 @@ export class MessageDispatcherService {
     private playerAvailableActionsChangedHandlerService: PlayerAvailableActionsChangedHandlerService,
     private itemRemovedHandlerService: ItemRemovedHandlerService,
     private gameResourceQuantityChangedHandlerService: GameResourceQuantityChangedHandlerService,
+    private gameObjectStageChangedHandlerService: GameObjectStageChangedHandlerService,
   ) { }
 
   public handleMessage<T extends object>(messageContainer: ServerMessageContainer<T>): void {
@@ -107,6 +110,10 @@ export class MessageDispatcherService {
       }
       case ServerMessageType.gameResourceQuantityChanged: {
         this.gameResourceQuantityChangedHandlerService.handle(messageContainer.message as ServerMessageGameResourceQuantityChanged);
+        break;
+      }
+      case ServerMessageType.gameObjectStageChanged: {
+        this.gameObjectStageChangedHandlerService.handle(messageContainer.message as ServerMessageGameObjectStageChanged);
         break;
       }
       default:

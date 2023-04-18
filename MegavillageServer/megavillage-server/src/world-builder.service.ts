@@ -5,6 +5,7 @@ import { Shop } from './shared/game-state/shop';
 import { PlayerActionType } from './shared/game-state/player-action-type';
 import { ResourceType } from './shared/game-state/resource-type';
 import { ItemType } from './shared/game-state/item-type';
+import { GameObjectWithStages } from './shared/game-state/game-object-with-stages';
 
 @Injectable()
 export class WorldBuilderService {
@@ -20,6 +21,10 @@ export class WorldBuilderService {
   private treeHeight = 100;
   private shopWidth = 600;
   private shopHeight = 200;
+  private bushWidth = 50;
+  private bushHeight = 50;
+  private bushMaxStages = 4;
+  private bushTotalTimePerStage = 10000;
   public builderNextGameObjectId: number;
 
   public constructor() {
@@ -63,6 +68,14 @@ export class WorldBuilderService {
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -4),
       this.buildTree(this.builderNextGameObjectId++, this.treeWidth * -7, this.treeHeight * -5),
       this.buildShop(this.builderNextGameObjectId++, 0, -400),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 0, 1, this.bushTotalTimePerStage),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 1, 1, this.bushTotalTimePerStage / 2),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 2, 2, this.bushTotalTimePerStage),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 3, 2, this.bushTotalTimePerStage / 2),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 4, 3, this.bushTotalTimePerStage),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 5, 3, this.bushTotalTimePerStage / 2),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 6, 4, 0),
+      this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 7, 4, 0),
     );
     return objects;
   }
@@ -141,6 +154,24 @@ export class WorldBuilderService {
       speed: 0,
       items: [],
       maxItemCount: 0,
+    };
+  }
+
+  private buildBush(id: number, x: number, y: number, currentStage: number, timeUntilNextStage: number): GameObjectWithStages {
+    return {
+      blocksMovement: true,
+      id: id,
+      position: { x: x, y: y },
+      size: { x: this.bushWidth, y: this.bushHeight },
+      type: GameObjectType.bush,
+      direction: { x: 0, y: 0 },
+      speed: 0,
+      items: [],
+      maxItemCount: 0,
+      currentStage: currentStage,
+      maxStages: this.bushMaxStages,
+      timeUntilNextStage: timeUntilNextStage,
+      totalTimePerStage: this.bushTotalTimePerStage,
     };
   }
 }

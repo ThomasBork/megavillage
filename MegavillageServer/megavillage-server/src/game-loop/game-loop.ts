@@ -11,6 +11,8 @@ import { GameObject } from 'src/shared/game-state/game-object';
 import { GameObjectService } from 'src/game-object.service';
 import { ActionCompletedComposer } from 'src/message-composers/action-completed-composer';
 import { ActionCanceledComposer } from 'src/message-composers/action-canceled-composer';
+import { GameObjectWithStages } from 'src/shared/game-state/game-object-with-stages';
+import { GameObjectStageChangedComposer } from 'src/message-composers/game-object-stage-changed-composer';
 
 @Injectable()
 export class GameLoop implements OnApplicationBootstrap {
@@ -26,6 +28,7 @@ export class GameLoop implements OnApplicationBootstrap {
     private gameObjectNewPositionComposer: GameObjectNewPositionComposer,
     private actionCompletedComposer: ActionCompletedComposer,
     private actionCanceledComposer: ActionCanceledComposer,
+    private gameObjectStageChangedComposer: GameObjectStageChangedComposer,
     private inputBufferService: InputBufferService,
     private gameObjectService: GameObjectService,
   ) {
@@ -44,6 +47,7 @@ export class GameLoop implements OnApplicationBootstrap {
       const game = this.gameManager.getGame();
       this.updatePlayerActions(game);
       this.updateGameObjectMovement(game);
+      this.updateGameObjectStages(game);
       this.previousTickTime = this.currentTickTime;
     }
     this.flushMessageQueues();
@@ -101,6 +105,42 @@ export class GameLoop implements OnApplicationBootstrap {
         }
       }
     }
+  }
+
+  private updateGameObjectStages(game: Game): void {
+    const gameObjectsWithStages = game.gameObjects.filter((o)=>this.doesGameObjectHaveStages(o));
+    for (const gameObject of gameObjectsWithStages) {
+      const gameObjectsWithStages = gameObject as GameObjectWithStages;
+      const previousStage = gameObjectsWithStages.currentStage;
+      const timeToAdd = this.tickFrequencyInMilliseconds;
+      gameObjectsWithStages.timeUntilNextStage -= timeToAdd;
+
+      while (
+        gameObjectsWithStages.currentStage < gameObjectsWithStages.maxStages 
+        && gameObjectsWithStages.timeUntilNextStage < 0
+      ) {
+        gameObjectsWithStages.currentStage++;
+        gameObjectsWithStages.timeUntilNextStage += gameObjectsWithStages.totalTimePerStage;
+      }
+
+      if (gameObjectsWithStages.currentStage === gameObjectsWithStages.maxStages) {
+        gameObjectsWithStages.timeUntilNextStage = 0;
+      }
+
+      if (previousStage !== gameObjectsWithStages.currentStage) {
+        const message = this.gameObjectStageChangedComposer.compose(
+          gameObjectsWithStages.id, 
+          previousStage, 
+          gameObjectsWithStages.currentStage, 
+          gameObjectsWithStages.timeUntilNextStage
+        );
+        this.gameManager.queueMessageToAllPlayers(message);
+      }
+    }
+  }
+
+  private doesGameObjectHaveStages(gameObject: GameObject): boolean {
+    return gameObject.type === GameObjectType.bush;
   }
 
   private calculateAndUpdateDirectionForPlayer(player: Player): Vector2 {

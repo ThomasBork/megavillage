@@ -3,4 +3,5 @@ export enum GameObjectType {
   rock = 'rock',
   player = 'player',
   shop = 'shop',
+  bush = 'bush',
 }

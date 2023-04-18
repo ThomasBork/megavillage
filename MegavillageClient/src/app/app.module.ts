@@ -14,6 +14,7 @@ import { AnimationComponent } from './common/animation/animation.component';
 import { PlayerComponent } from './game/game-object/player/player.component';
 import { HudResourcesComponent } from './game/hud/hud-resources/hud-resources.component';
 import { HudShopWindowComponent } from './game/hud/hud-shop-window/hud-shop-window.component';
+import { GameObjectWithStagesComponent } from './game/game-object/game-object-with-stages/game-object-with-stages.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { HudShopWindowComponent } from './game/hud/hud-shop-window/hud-shop-wind
     AnimationComponent,
     PlayerComponent,
     HudResourcesComponent,
-    HudShopWindowComponent
+    HudShopWindowComponent,
+    GameObjectWithStagesComponent
   ],
   imports: [
     BrowserModule,

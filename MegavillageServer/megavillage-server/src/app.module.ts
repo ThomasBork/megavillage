@@ -33,6 +33,7 @@ import { WorldBuilderService } from './world-builder.service';
 import { BuyItemHandler } from './message-handlers/buy-item-handler';
 import { TakeItemHandler } from './message-handlers/take-item-handler';
 import { GiveItemHandler } from './message-handlers/give-item-handler';
+import { GameObjectStageChangedComposer } from './message-composers/game-object-stage-changed-composer';
 
 @Module({
   imports: [],
@@ -67,6 +68,7 @@ import { GiveItemHandler } from './message-handlers/give-item-handler';
     PlayerAvailableActionsChangedComposer,
     ItemRemovedComposer,
     GameResourceQuantityChangedComposer,
+    GameObjectStageChangedComposer,
     UserPersistenceService,
     ListService,
     WorldBuilderService,
