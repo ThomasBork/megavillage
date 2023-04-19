@@ -26,6 +26,8 @@ import { WorldBuilderService } from './world-builder.service';
 import { ItemRecipe } from './shared/game-state/item-recipe';
 import { Shop } from './shared/game-state/shop';
 import { GameResource } from './shared/game-state/game-resource';
+import { GameObjectStageChangedComposer } from './message-composers/game-object-stage-changed-composer';
+import { GameObjectWithStages } from './shared/game-state/game-object-with-stages';
 
 @Injectable()
 export class GameManager {
@@ -43,6 +45,7 @@ export class GameManager {
     private itemResourceStackQuantityChangedComposer: ItemResourceStackQuantityChangedComposer,
     private itemRemovedComposer: ItemRemovedComposer,
     private gameResourceQuantityChangedComposer: GameResourceQuantityChangedComposer,
+    private gameObjectStageChangedComposer: GameObjectStageChangedComposer,
     private worldBuilderService: WorldBuilderService,
   ) {
     const gameObjects = this.worldBuilderService.buildWorld();
@@ -66,6 +69,9 @@ export class GameManager {
       }, {
         actionType: PlayerActionType.turnInResources,
         targetType: GameObjectType.shop,
+      }, {
+        actionType: PlayerActionType.harvest,
+        targetType: GameObjectType.bush,
       }],
     };
   }
@@ -168,6 +174,31 @@ export class GameManager {
         this.removeGameObject(target);
         const stoneToGive = 10 + Math.floor(Math.random() * 5);
         this.giveResourcesToPlayer(player, ResourceType.stone, stoneToGive);
+        break;
+      }
+      case PlayerActionType.harvest: {
+        const targetWithStages = target as GameObjectWithStages;
+        if (targetWithStages.currentStage > 1) {
+          switch(target.type) {
+            case GameObjectType.bush: {
+              const minBerriesFound = 4 * (targetWithStages.currentStage - 1) - 1;
+              const maxBerriesFound = minBerriesFound + 2;
+              const berriesFound = minBerriesFound + Math.floor(Math.random() * (maxBerriesFound - minBerriesFound));
+              this.giveResourcesToPlayer(player, ResourceType.berries, berriesFound);
+
+              const previousStage = targetWithStages.currentStage;
+              targetWithStages.currentStage = 1;
+              targetWithStages.timeUntilNextStage = targetWithStages.totalTimePerStage;
+              const message = this.gameObjectStageChangedComposer.compose(
+                targetWithStages.id, 
+                previousStage, 
+                targetWithStages.currentStage, 
+                targetWithStages.timeUntilNextStage
+              );
+              this.queueMessageToAllPlayers(message);
+            }
+          }
+        }
         break;
       }
       case PlayerActionType.turnInResources: {
@@ -303,6 +334,7 @@ export class GameManager {
     switch(resourceType) {
       case ResourceType.wood: return 30;
       case ResourceType.stone: return 20;
+      case ResourceType.berries: return 20;
       default: throw new Error('No resource stack max quantity for: "' + resourceType + '".');
     }
   }

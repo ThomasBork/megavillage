@@ -31,6 +31,7 @@ export class PlayerComponent {
     switch (this.getAction().type) {
       case PlayerActionType.chop: return 2;
       case PlayerActionType.mine: return 2;
+      case PlayerActionType.harvest: return 2;
       default: throw new Error ('No animation image count set for action type: "' + this.getAction().type.toString() + '".');
     }
   }
@@ -39,6 +40,7 @@ export class PlayerComponent {
     switch (this.getAction().type) {
       case PlayerActionType.chop: return 500;
       case PlayerActionType.mine: return 100;
+      case PlayerActionType.harvest: return 200;
       default: throw new Error ('No animation image count set for action type: "' + this.getAction().type.toString() + '".');
     }
   }

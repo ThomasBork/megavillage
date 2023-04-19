@@ -63,6 +63,7 @@ export class PerformActionHandler {
 
   private calculateTimeToPerformAction(player: Player, target: GameObject, actionType: PlayerActionType): number {
     switch(actionType) {
+      case PlayerActionType.harvest: return 2000;
       case PlayerActionType.chop: return 3000;
       case PlayerActionType.mine: return 5000;
       case PlayerActionType.fish: return 10000;

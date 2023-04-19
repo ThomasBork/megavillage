@@ -8,4 +8,5 @@ export enum PlayerActionType {
 	takeItem = 'takeItem',
 	buyItem = 'buyItem',
 	turnInResources = 'turnInResources',
+	harvest = 'harvest',
 }
