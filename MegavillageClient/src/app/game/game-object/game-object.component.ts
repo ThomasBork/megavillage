@@ -12,11 +12,15 @@ import { GameObjectType } from 'src/shared/game-state/game-object-type';
 })
 export class GameObjectComponent {
   @Input()
-  gameObject!: UIGameObject;
+  public gameObject!: UIGameObject;
 
   public constructor(private gameService: GameService) {}
 
-  public getBorder(): string | undefined {
+  public isCurrentTarget(): boolean {
+    return this.gameService.getGame().getCurrentTargetObject() === this.gameObject;
+  }
+
+  public getBorder(): string {
     const isTarget = this.gameService.getGame().getCurrentTargetObject() === this.gameObject;
     if (isTarget) {
       return '2px dashed lightgrey';
@@ -53,6 +57,16 @@ export class GameObjectComponent {
   }
 
   public getZIndex(): number {
-    return this.gameObject.getMinY();
+    if (this.gameObject instanceof UIGameObjectPlayer) {
+      return 1000;
+    }
+    if (this.gameObject.getIsBlockingMovement()) {
+      return 100;
+    }
+    return 10;
+  }
+
+  public shouldImageBeStretchedToEdges(): boolean {
+    return this.gameObject.getType() === GameObjectType.water;
   }
 }

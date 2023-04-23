@@ -3,4 +3,5 @@ export enum ItemType {
   axe = 'axe',
   drill = 'drill',
   fishingRod = 'fishingRod',
+  flippers = 'flippers',
 }

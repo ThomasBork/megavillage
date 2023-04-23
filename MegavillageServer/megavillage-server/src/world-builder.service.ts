@@ -24,6 +24,8 @@ export class WorldBuilderService {
   private bushWidth = 50;
   private bushHeight = 50;
   private bushMaxStages = 4;
+  private waterWidth = 50;
+  private waterHeight = 50;
   private bushTotalTimePerStage = 10000;
   public builderNextGameObjectId: number;
 
@@ -76,6 +78,9 @@ export class WorldBuilderService {
       this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 5, 3, this.bushTotalTimePerStage / 2),
       this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 6, 4, 0),
       this.buildBush(this.builderNextGameObjectId++, this.bushWidth * -6, this.bushHeight * 7, 4, 0),
+      this.buildWater(this.builderNextGameObjectId++, this.waterWidth * 3, this.waterHeight * 0),
+      this.buildWater(this.builderNextGameObjectId++, this.waterWidth * 4, this.waterHeight * 0),
+      this.buildWater(this.builderNextGameObjectId++, this.waterWidth * 5, this.waterHeight * 0),
     );
     return objects;
   }
@@ -103,6 +108,7 @@ export class WorldBuilderService {
         }],
         name: 'Drill',
         type: ItemType.drill,
+        objectsThatCanBeWalkedOverWithItem: [],
       }, {
         id: this.builderNextGameObjectId++,
         actionsEnabledByItem: [{
@@ -118,6 +124,20 @@ export class WorldBuilderService {
         }],
         name: 'Fishing Rod',
         type: ItemType.fishingRod,
+        objectsThatCanBeWalkedOverWithItem: [],
+      }, {
+        id: this.builderNextGameObjectId++,
+        actionsEnabledByItem: [],
+        cost: [{
+          quantity: 300,
+          resourceType: ResourceType.wood,
+        }, {
+          quantity: 200,
+          resourceType: ResourceType.berries,
+        }],
+        name: 'Flippers',
+        type: ItemType.flippers,
+        objectsThatCanBeWalkedOverWithItem: [GameObjectType.water],
       }]
     };
     shop.items.length = shop.maxItemCount;
@@ -136,6 +156,20 @@ export class WorldBuilderService {
       position: { x: x, y: y },
       size: { x: this.rockWidth, y: this.rockHeight },
       type: GameObjectType.rock,
+      direction: { x: 0, y: 0 },
+      speed: 0,
+      items: [],
+      maxItemCount: 0,
+    };
+  }
+
+  private buildWater(id: number, x: number, y: number): GameObject {
+    return {
+      blocksMovement: true,
+      id: id,
+      position: { x: x, y: y },
+      size: { x: this.waterWidth, y: this.waterHeight },
+      type: GameObjectType.water,
       direction: { x: 0, y: 0 },
       speed: 0,
       items: [],

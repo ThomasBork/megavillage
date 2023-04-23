@@ -55,7 +55,10 @@ export class GameManager {
       gameObjects: gameObjects,
       sharedResources: [{
         resourceType: ResourceType.wood,
-        quantity: 0,
+        quantity: 1000,
+      }, {
+        resourceType: ResourceType.berries,
+        quantity: 1000,
       }],
       basicActionsForPlayers: [{
         actionType: PlayerActionType.buy,
@@ -140,6 +143,7 @@ export class GameManager {
         name: 'Axe',
         type: ItemType.axe,
         actionsEnabledByItem: [{actionType: PlayerActionType.chop, targetType: GameObjectType.tree}],
+        objectsThatCanBeWalkedOverWithItem: []
       }],
       maxItemCount: 8,
       availableActions: []
@@ -239,6 +243,7 @@ export class GameManager {
       actionsEnabledByItem: [...itemRecipe.actionsEnabledByItem],
       name: itemRecipe.name,
       type: itemRecipe.type,
+      objectsThatCanBeWalkedOverWithItem: [...itemRecipe.objectsThatCanBeWalkedOverWithItem],
     };
     this.giveItemToGameObject(shop, item);
   }
@@ -325,6 +330,7 @@ export class GameManager {
         quantity: quantityToAddToStack,
         resourceType: resourceType,
         type: ItemType.resourceStack,
+        objectsThatCanBeWalkedOverWithItem: [],
       };
       this.giveItemToGameObject(player, itemResourceStack);
     }

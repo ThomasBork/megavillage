@@ -164,9 +164,15 @@ export class GameLoop implements OnApplicationBootstrap {
     return combinedDirection;
   }
 
+  private canObjectMoveOverObject(movingObject: GameObject, otherObject: GameObject): boolean {
+    return !otherObject.blocksMovement 
+      || this.gameManager.getActualItems(movingObject)
+        .some((i) => i.objectsThatCanBeWalkedOverWithItem.includes(otherObject.type));
+  }
+
   private capMovementByCollision(movingObject: GameObject, desiredMovement: Vector2, otherObjects: GameObject[]): Vector2 {
     const newMovement = this.vectorService.cloneVector(desiredMovement);
-    const blockingObjects = otherObjects.filter((o) => o.blocksMovement);
+    const blockingObjects = otherObjects.filter((o) => !this.canObjectMoveOverObject(movingObject, o));
     const newDesiredPosition = this.vectorService.addVectors(movingObject.position, desiredMovement);
     const desiredNewObject = this.gameObjectService.clonePhysicalGameObject(movingObject);
     desiredNewObject.position = newDesiredPosition;

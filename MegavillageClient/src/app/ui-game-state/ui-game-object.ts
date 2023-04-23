@@ -35,6 +35,9 @@ export class UIGameObject {
   public getMaxY(): number {
     return this.getPosition().y + this.getSize().y / 2;
   }
+  public getIsBlockingMovement(): boolean {
+    return this.serverState.blocksMovement;
+  }
   public getItems(): (Item | null)[] {
     return this.serverState.items;
   }

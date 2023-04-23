@@ -1,15 +1,19 @@
 <div 
   class="game-object-container"
+  [ngClass]="{'target': isCurrentTarget()}"
   [ngStyle]="{
     left: gameObject.getPosition().x - gameObject.getSize().x / 2 + 'px',
     top: gameObject.getPosition().y - gameObject.getSize().y / 2 + 'px',
-    width: gameObject.getSize().x + 'px',
-    height: gameObject.getSize().y + 'px',
-    border: getBorder(),
-    'z-index': true ? getZIndex() : 2
+    width: gameObject.getSize().x + 1 + 'px',
+    height: gameObject.getSize().y + 1 + 'px',
+    'z-index': getZIndex()
   }"
 >
   <app-player *ngIf="isPlayer()" [player]="getPlayer()"></app-player>
   <app-game-object-with-stages *ngIf="isGameObjectWithStages()" [gameObject]="getGameObjectWithStages()"></app-game-object-with-stages>
-  <img *ngIf="!isPlayer() && !isGameObjectWithStages()" class="image" [src]="getImagePath()" />
+  <img 
+    *ngIf="!isPlayer() && !isGameObjectWithStages()" 
+    [ngClass]="{'image-stretchd-to-edges': shouldImageBeStretchedToEdges()}" 
+    class="image" 
+    [src]="getImagePath()" />
 </div>
