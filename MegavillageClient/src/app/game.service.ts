@@ -72,7 +72,7 @@ export class GameService {
       x: currentPlayer.getPosition().x + currentPlayer.getSize().x * 1 / 8 * game.getMovementDirection().x,
       y: currentPlayer.getPosition().y + currentPlayer.getSize().y * 1 / 8 * game.getMovementDirection().y,
     };
-    const targetAreaSize = currentPlayer.getSize();//this.vectorService.multiplyVector(currentPlayer.getSize(), 2);
+    const targetAreaSize = this.vectorService.multiplyVector(currentPlayer.getSize(), 1.1);
     const possibleTargets = game.getGameObjects()
       .filter((o) => o !== currentPlayer)
       .filter((o) => this.getAvailableActionTypesOnTarget(currentPlayer, o).length > 0)

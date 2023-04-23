@@ -12,5 +12,6 @@ export class GameObjectRemovedHandlerService {
 
   public handle(message: ServerMessageGameObjectRemoved): void {
     this.gameService.getGame().removeGameObjectWithId(message.gameObjectId);
+    this.gameService.updateCurrentTargetObject();
   }
 }
