@@ -8,6 +8,7 @@
     height: gameObject.getSize().y + 1 + 'px',
     'z-index': getZIndex()
   }"
+  (click)="onClick()"
 >
   <app-player *ngIf="isPlayer()" [player]="getPlayer()"></app-player>
   <app-game-object-with-stages *ngIf="isGameObjectWithStages()" [gameObject]="getGameObjectWithStages()"></app-game-object-with-stages>

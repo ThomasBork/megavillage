@@ -1,4 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { ActionService } from 'src/app/action.service';
+import { GameObjectService } from 'src/app/game-object.service';
 import { GameService } from 'src/app/game.service';
 import { UIGameObject } from 'src/app/ui-game-state/ui-game-object';
 import { UIGameObjectPlayer } from 'src/app/ui-game-state/ui-game-object-player';
@@ -14,7 +16,11 @@ export class GameObjectComponent {
   @Input()
   public gameObject!: UIGameObject;
 
-  public constructor(private gameService: GameService) {}
+  public constructor(
+    private gameService: GameService,
+    private actionService: ActionService,
+    private gameObjectService: GameObjectService,
+  ) {}
 
   public isCurrentTarget(): boolean {
     return this.gameService.getGame().getCurrentTargetObject() === this.gameObject;
@@ -68,5 +74,20 @@ export class GameObjectComponent {
 
   public shouldImageBeStretchedToEdges(): boolean {
     return this.gameObject.getType() === GameObjectType.water;
+  }
+
+  public onClick(): void {
+    const player = this.gameService.getCurrentPlayer();
+    if (this.isCurrentTarget()) {
+      this.actionService.handleGenericActionOnObject(player, this.gameObject);
+    } else {
+      const xDistanceFromPlayer = this.gameObjectService.calculateDistanceOverlappedOnXAxis(this.gameObject, player.getPosition(), player.getSize());
+      const yDistanceFromPlayer = this.gameObjectService.calculateDistanceOverlappedOnYAxis(this.gameObject, player.getPosition(), player.getSize());
+      const minOverlappedDistance = Math.min(xDistanceFromPlayer, yDistanceFromPlayer);
+      console.log(minOverlappedDistance);
+      if (minOverlappedDistance > -10) {
+        this.gameService.getGame().setCurrentTargetObject(this.gameObject);
+      }
+    }
   }
 }
